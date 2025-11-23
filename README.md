@@ -28,9 +28,8 @@ Save hours in your process — install the tools you need, sync your configs, an
 
 ## Why Choose Anvil?
 - **Fast Setup** - Get coding in minutes, not hours
-- **Consistency** - Same configs across all machines
-- **Built-in Safety** - Dry-run mode and automatic backups
-- **Secure Collaboration** - Private GitHub repository sync
+- **Consistency** - Same configs and tools across all machines
+- **Built-in Safety** - Dry-run mode, private repo enforcement and automatic backups
 
 ## Quick Start
 
@@ -54,8 +53,11 @@ anvil update
 # Initialize Anvil
 anvil init
 
+# Check environment health
+anvil doctor
+
 # Install development tools
-anvil install dev        # git, zsh, iterm2, visual-studio-code
+anvil install essentials # sample essentials group
 anvil install terraform  # Individual apps
 
 # Import tool groups from shared configs
@@ -63,9 +65,6 @@ anvil config import https://example.com/team-groups.yaml
 
 # Or start with example configurations
 anvil config import https://raw.githubusercontent.com/0xjuanma/anvil/master/docs/import-examples/juanma-essentials.yaml
-
-# Check environment health
-anvil doctor
 
 # Sync configurations (after setting up GitHub repo)
 anvil config push neovim

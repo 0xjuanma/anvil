@@ -31,6 +31,22 @@ Save hours in your process — install the tools you need, sync your configs, an
 - **Consistency** - Same configs and tools across all machines
 - **Built-in Safety** - Dry-run mode, private repo enforcement and automatic backups
 
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `anvil init` | Initialize your Anvil environment & dependencies |
+| `anvil doctor` | Check system health |
+| `anvil install essentials/[group-name]` | Install essential tools |
+| `anvil config show` | Show your anvil settings |
+| `anvil config push [app-name]` | Push your app configurations to GitHub |
+| `anvil config pull [app-name]` | Pull your app configurations from GitHub |
+| `anvil config sync [app-name]` | Sync your app configurations to your local machine |
+| `anvil clean` | Clean your anvil environment |
+| `anvil update` | Update your anvil installation |
+| `anvil version` | Show the version of anvil |
+
+
 ## Quick Start
 
 ### Installation
@@ -45,7 +61,6 @@ curl -sSL https://github.com/0xjuanma/anvil/releases/latest/download/install.sh 
 anvil update
 ```
 
-> **Note**: The `anvil update` command was introduced in v1.2.0. If you have an older version, use the curl command above.
 
 ### Try It Out
 

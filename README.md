@@ -37,11 +37,11 @@ Save hours in your process — install the tools you need, sync your configs, an
 |---------|-------------|
 | `anvil init` | Initialize your Anvil environment & dependencies |
 | `anvil doctor` | Check system health |
-| `anvil install essentials/[group-name]` | Install essential tools |
-| `anvil config show` | Show your anvil settings |
+| `anvil install [group-name]` | Install tools by groups|
+| `anvil config show [app-name]` | Show your anvil settings or app settings |
 | `anvil config push [app-name]` | Push your app configurations to GitHub |
 | `anvil config pull [app-name]` | Pull your app configurations from GitHub |
-| `anvil config sync [app-name]` | Sync your app configurations to your local machine |
+| `anvil config sync [app-name]` | Sync your pulled app configurations to your local machine |
 | `anvil clean` | Clean your anvil environment |
 | `anvil update` | Update your anvil installation |
 | `anvil version` | Show the version of anvil |

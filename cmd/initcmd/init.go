@@ -30,21 +30,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// InitCmd represents the init command for macOS environment setup
+// InitCmd represents the init command for Anvil CLI environment setup
 var InitCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize Anvil CLI environment for macOS",
+	Short: "Initialize Anvil CLI environment",
 	Long:  constants.INIT_COMMAND_LONG_DESCRIPTION,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := runInitCommand(); err != nil {
+		if err := runInitCommand(cmd); err != nil {
 			palantir.GetGlobalOutputHandler().PrintError("Initialization failed: %v", err)
 			os.Exit(1)
 		}
 	},
 }
 
-// runInitCommand executes the complete initialization process for Anvil CLI on macOS
-func runInitCommand() error {
+// runInitCommand executes the complete initialization process for Anvil CLI environment
+func runInitCommand(cmd *cobra.Command) error {
 	// Display initialization banner
 	fmt.Println(charm.RenderBox("🔨 ANVIL INITIALIZATION", "", "#00D9FF", true))
 	fmt.Println()
@@ -83,7 +83,7 @@ func runInitCommand() error {
 
 	// Stage 4: Check local environment configurations
 	o.PrintStage("Stage 4: Environment Check")
-	spinner = charm.NewLineSpinner("Checking local environment configurations")
+	spinner = charm.NewDotsSpinner("Checking local environment configurations")
 	spinner.Start()
 	warnings := config.CheckEnvironmentConfigurations()
 	if len(warnings) > 0 {
@@ -94,8 +94,20 @@ func runInitCommand() error {
 	} else {
 		spinner.Success("Environment configurations are properly set")
 	}
+	// Stage 5: Run the discovery logic only if the --discover flag is provided
+	discoverFlag, _ := cmd.Flags().GetBool("discover")
+	if discoverFlag {
+		o.PrintStage("Stage 5: App Discovery Logic")
+		spinner = charm.NewDotsSpinner("Running discovery logic")
+		spinner.Start()
+		if err := config.RunDiscoverLogic(); err != nil {
+			spinner.Error("Failed to run app discovery logic")
+			return errors.NewConfigurationError(constants.OpInit, "run-discover-logic", err)
+		}
+		spinner.Success("App discovery logic completed")
+	}
 
-	// Stage 5: Print completion message and next steps
+	// Stage 6: Print completion message and next steps
 	o.PrintHeader("Initialization Complete!")
 	o.PrintInfo("Anvil has been successfully initialized and is ready to use.")
 	o.PrintInfo("Configuration files have been created in: %s", config.GetAnvilConfigPath())
@@ -136,7 +148,7 @@ func runInitCommand() error {
 	} else {
 		o.PrintInfo("Available groups: dev, essentials")
 	}
-	o.PrintInfo("Example: 'anvil install dev' or 'anvil install firefox'")
+	o.PrintInfo("Example: 'anvil install essentials' or 'anvil install firefox'")
 
 	return nil
 }
@@ -144,4 +156,5 @@ func runInitCommand() error {
 func init() {
 	// Add flags for additional functionality
 	InitCmd.Flags().Bool("skip-tools", false, "Skip tool validation and installation")
+	InitCmd.Flags().Bool("discover", false, "Run the discovery logic")
 }

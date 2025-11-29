@@ -22,6 +22,7 @@ import (
 
 	"github.com/0xjuanma/anvil/internal/brew"
 	"github.com/0xjuanma/anvil/internal/system"
+	"github.com/0xjuanma/palantir"
 )
 
 // RunDiscoverLogic discovers apps and tools installed on the system and adds them to the "discovered-apps" group if not tracked
@@ -29,26 +30,32 @@ func RunDiscoverLogic() error {
 	// 1. Use Homebrew to discover tools(using --formulae flag)
 	homebrewTools, err := discoverHomebrewTools()
 	if err != nil {
-		return err
+		// Log error but continue with macOS app discovery
+		palantir.GetGlobalOutputHandler().PrintWarning("Failed to discover Homebrew tools: %v", err)
 	}
 
 	// 2. Use Applications folder to discover apps
 	macOSApps := []string{}
 	if system.IsMacOS() {
-		macOSApps, err = macOSAppDiscovery()
+		macOSApps, err = discoverMacOSApps()
 		if err != nil {
 			return err
 		}
 	}
 
-	// 3. Iterate over all discovered apps and add them to the "discovered-apps" group if not tracked
+	// 3. Filter tracked apps
+	var appsToAdd []string
 	for _, app := range append(homebrewTools, macOSApps...) {
 		tracked, err := IsAppTracked(app)
 		if err != nil || tracked {
 			continue
 		}
+		appsToAdd = append(appsToAdd, app)
+	}
 
-		if err := AddAppToGroup("discovered-apps", app); err != nil {
+	// 4. Add all discovered apps to the "discovered-apps" group in bulk
+	if len(appsToAdd) > 0 {
+		if err := AddAppsToGroup("discovered-apps", appsToAdd); err != nil {
 			return err
 		}
 	}
@@ -71,8 +78,8 @@ func discoverHomebrewTools() ([]string, error) {
 	return tools, nil
 }
 
-// macOSAppDiscovery discovers apps in the /Applications folder
-func macOSAppDiscovery() ([]string, error) {
+// discoverMacOSApps discovers apps in the /Applications folder
+func discoverMacOSApps() ([]string, error) {
 	apps := []string{}
 
 	defaultApps := []string{
@@ -83,7 +90,6 @@ func macOSAppDiscovery() ([]string, error) {
 		"photo-booth", "photos", "preview", "quicktime-player",
 		"reminders", "safari", "stickies", "system-preferences",
 		"system-settings", "textedit", "time-machine", "tv",
-		"utilities",
 	}
 	defaultAppSet := make(map[string]struct{}, len(defaultApps))
 	for _, app := range defaultApps {

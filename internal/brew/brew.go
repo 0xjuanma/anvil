@@ -259,7 +259,9 @@ func GetInstalledPackages() ([]BrewPackage, error) {
 	lines := strings.Split(strings.TrimSpace(result.Output), "\n")
 
 	for _, line := range lines {
-		if line != "" {
+		line = strings.TrimSpace(line)
+		// Filter out empty lines and potential noise/status messages (e.g. "✔︎ JSON API...")
+		if line != "" && !strings.Contains(line, "JSON API") && !strings.Contains(line, "✔") {
 			packages = append(packages, BrewPackage{
 				Name:      line,
 				Installed: true,

@@ -34,7 +34,9 @@ var defaultAppSet = map[string]struct{}{
 	"facetime":           {},
 	"finder":             {},
 	"font-book":          {},
+	"garageband":         {},
 	"image-capture":      {},
+	"imovie":             {},
 	"keychain-access":    {},
 	"mail":               {},
 	"maps":               {},
@@ -142,7 +144,8 @@ func discoverMacOSApps() ([]string, error) {
 	}
 
 	for _, entry := range entries {
-		if !entry.IsDir() || !strings.HasSuffix(entry.Name(), ".app") {
+		// Skip dotfiles, non-directories, and non-app bundles
+		if strings.HasPrefix(entry.Name(), ".") || !entry.IsDir() || !strings.HasSuffix(entry.Name(), ".app") {
 			continue
 		}
 

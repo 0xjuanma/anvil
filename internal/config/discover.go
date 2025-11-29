@@ -25,6 +25,57 @@ import (
 	"github.com/0xjuanma/palantir"
 )
 
+var defaultAppSet = map[string]struct{}{
+	"calculator":         {},
+	"calendar":           {},
+	"chess":              {},
+	"contacts":           {},
+	"dictionary":         {},
+	"facetime":           {},
+	"finder":             {},
+	"font-book":          {},
+	"image-capture":      {},
+	"keychain-access":    {},
+	"mail":               {},
+	"maps":               {},
+	"messages":           {},
+	"music":              {},
+	"news":               {},
+	"notes":              {},
+	"photo-booth":        {},
+	"photos":             {},
+	"preview":            {},
+	"quicktime-player":   {},
+	"reminders":          {},
+	"safari":             {},
+	"stickies":           {},
+	"system-preferences": {},
+	"system-settings":    {},
+	"textedit":           {},
+	"time-machine":       {},
+	"tv":                 {},
+}
+
+var appAliases = map[string]string{
+	"iTerm":              "iterm2",
+	"Zoom.us":            "zoom",
+	"1Password 7":        "1password",
+	"1Password":          "1password",
+	"Visual Studio Code": "visual-studio-code",
+	"Google Chrome":      "google-chrome",
+	"Firefox":            "firefox",
+	"Slack":              "slack",
+	"Discord":            "discord",
+	"Docker":             "docker",
+	"VLC":                "vlc",
+	"Sublime Text":       "sublime-text",
+	"Android Studio":     "android-studio",
+	"GoLand":             "goland",
+	"WebStorm":           "webstorm",
+	"PyCharm":            "pycharm",
+	"IntelliJ IDEA":      "intellij-idea",
+}
+
 // RunDiscoverLogic discovers apps and tools installed on the system and adds them to the "discovered-apps" group if not tracked
 func RunDiscoverLogic() error {
 	// 1. Use Homebrew to discover tools(using --formulae flag)
@@ -82,29 +133,9 @@ func discoverHomebrewTools() ([]string, error) {
 func discoverMacOSApps() ([]string, error) {
 	apps := []string{}
 
-	defaultApps := []string{
-		"calculator", "calendar", "chess", "contacts",
-		"dictionary", "facetime", "finder", "font-book",
-		"image-capture", "keychain-access", "mail", "maps",
-		"messages", "music", "news", "notes",
-		"photo-booth", "photos", "preview", "quicktime-player",
-		"reminders", "safari", "stickies", "system-preferences",
-		"system-settings", "textedit", "time-machine", "tv",
-	}
-	defaultAppSet := make(map[string]struct{}, len(defaultApps))
-	for _, app := range defaultApps {
-		defaultAppSet[app] = struct{}{}
-	}
-
 	entries, err := os.ReadDir("/Applications")
 	if err != nil {
 		return nil, err
-	}
-
-	appNameToPackage := func(name string) string {
-		name = strings.TrimSuffix(name, ".app")
-		name = strings.ToLower(name)
-		return strings.ReplaceAll(name, " ", "-")
 	}
 
 	for _, entry := range entries {
@@ -112,7 +143,7 @@ func discoverMacOSApps() ([]string, error) {
 			continue
 		}
 
-		packageName := appNameToPackage(entry.Name())
+		packageName := convertAppNameToPackage(entry.Name())
 		if _, exists := defaultAppSet[packageName]; exists {
 			continue
 		}
@@ -121,4 +152,18 @@ func discoverMacOSApps() ([]string, error) {
 	}
 
 	return apps, nil
+}
+
+// convertAppNameToPackage converts a macOS .app name to a package name
+func convertAppNameToPackage(name string) string {
+	cleanName := strings.TrimSuffix(name, ".app")
+
+	// Check explicit aliases first
+	if pkg, ok := appAliases[cleanName]; ok {
+		return pkg
+	}
+
+	// Fallback to standard/basic normalization
+	name = strings.ToLower(cleanName)
+	return strings.ReplaceAll(name, " ", "-")
 }

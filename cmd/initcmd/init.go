@@ -156,5 +156,5 @@ func runInitCommand(cmd *cobra.Command) error {
 func init() {
 	// Add flags for additional functionality
 	InitCmd.Flags().Bool("skip-tools", false, "Skip tool validation and installation")
-	InitCmd.Flags().Bool("discover", false, "Run the discovery logic")
+	InitCmd.Flags().Bool("discover", false, "Run the app/package discovery logic")
 }

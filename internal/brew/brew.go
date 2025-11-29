@@ -238,15 +238,17 @@ func IsPackageInstalled(packageName string) bool {
 	return false
 }
 
-// GetInstalledPackages returns a list of installed packages
+// GetInstalledPackages returns a list of installed packages (leaves only)
 func GetInstalledPackages() ([]BrewPackage, error) {
 	if !IsBrewInstalled() {
 		return nil, fmt.Errorf("Homebrew is not installed")
 	}
 
-	result, err := system.RunCommand(constants.BrewCommand, constants.BrewList, "--formula")
+	// Use 'brew leaves' to get only top-level packages (not dependencies)
+	// Adding '--installed-on-request' to filter out dependencies that might have become leaves
+	result, err := system.RunCommand(constants.BrewCommand, "leaves", "--installed-on-request")
 	if err != nil {
-		return nil, fmt.Errorf("failed to run brew list: %w", err)
+		return nil, fmt.Errorf("failed to run brew leaves: %w", err)
 	}
 
 	if !result.Success {

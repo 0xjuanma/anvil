@@ -57,26 +57,26 @@ var defaultAppSet = map[string]struct{}{
 }
 
 var appAliases = map[string]string{
-	"iTerm":                   "iterm2",
-	"Zoom.us":                 "zoom",
-	"1Password 7":             "1password",
-	"Alfred 5":                "alfred",
-	"Alfred 4":                "alfred",
-	"pgAdmin 4":               "pgadmin4",
-	"DBeaver":                 "dbeaver-community",
-	"AltTab":                  "alt-tab",
-	"Adobe Acrobat Reader DC": "adobe-acrobat-reader",
-	"Parallels Desktop":       "parallels",
-	"CleanMyMac X":            "cleanmymac",
-	"Bartender 5":             "bartender",
-	"Bartender 4":             "bartender",
-	"Logi Options+":           "logi-options-plus",
-	"Hands Off!":              "hands-off",
-	"Box":                     "box-drive",
-	"pCloud":                  "pcloud-drive",
-	"SuperDuper!":             "superduper",
-	"VLC Media Player":        "vlc",
-	"Epic Games Launcher":     "epic-games",
+	"iterm":                   "iterm2",
+	"zoom.us":                 "zoom",
+	"1password 7":             "1password",
+	"alfred 5":                "alfred",
+	"alfred 4":                "alfred",
+	"pgadmin 4":               "pgadmin4",
+	"dbeaver":                 "dbeaver-community",
+	"alttab":                  "alt-tab",
+	"adobe acrobat reader dc": "adobe-acrobat-reader",
+	"parallels desktop":       "parallels",
+	"cleanmymac x":            "cleanmymac",
+	"bartender 5":             "bartender",
+	"bartender 4":             "bartender",
+	"logi options+":           "logi-options-plus",
+	"hands off!":              "hands-off",
+	"box":                     "box-drive",
+	"pcloud":                  "pcloud-drive",
+	"superduper!":             "superduper",
+	"vlc media player":        "vlc",
+	"epic games launcher":     "epic-games",
 }
 
 // RunDiscoverLogic discovers apps and tools installed on the system and adds them to the "discovered-apps" group if not tracked
@@ -160,13 +160,13 @@ func discoverMacOSApps() ([]string, error) {
 // convertAppNameToPackage converts a macOS .app name to a package name
 func convertAppNameToPackage(name string) string {
 	cleanName := strings.TrimSuffix(name, ".app")
+	lowerName := strings.ToLower(cleanName)
 
-	// Check explicit aliases first
-	if pkg, ok := appAliases[cleanName]; ok {
+	// Check aliases first
+	if pkg, ok := appAliases[lowerName]; ok {
 		return pkg
 	}
 
 	// Fallback to standard/basic normalization
-	name = strings.ToLower(cleanName)
-	return strings.ReplaceAll(name, " ", "-")
+	return strings.ReplaceAll(lowerName, " ", "-")
 }

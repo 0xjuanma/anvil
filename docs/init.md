@@ -15,8 +15,13 @@ The init command establishes a solid foundation for all other Anvil commands by:
 ## Usage
 
 ```bash
-anvil init
+anvil init [flags]
 ```
+
+### Flags
+
+- `--discover` - Automatically discover installed apps and add them to a "discovered-apps" group
+- `--skip-tools` - Skip tool validation and installation
 
 ## What It Does
 
@@ -85,7 +90,16 @@ The init command automatically detects and reports:
 - **Git Configuration** - Checks if Git is configured with user name and email
 - **Homebrew Status** - Verifies Homebrew installation and functionality
 
-### Stage 5: Recommendations
+### Stage 5: App Discovery (Optional)
+
+If run with `--discover`, Anvil scans your system for installed applications:
+
+- **Homebrew Discovery** - Finds all installed Homebrew packages
+- **macOS App Discovery** - Scans `/Applications` for apps (filtering defaults like Safari)
+- **Automatic Grouping** - Adds new, untracked apps to a `discovered-apps` group
+- **Safe Execution** - Non-destructive; only adds apps not already in your config
+
+### Stage 6: Recommendations
 
 Based on your system state, init provides personalized recommendations:
 

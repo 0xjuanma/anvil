@@ -65,8 +65,8 @@ anvil update
 ### Try It Out
 
 ```bash
-# Initialize Anvil
-anvil init
+# Initialize Anvil (optionally discover existing apps)
+anvil init --discover
 
 # Check environment health
 anvil doctor

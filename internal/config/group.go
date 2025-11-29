@@ -85,48 +85,34 @@ func UpdateGroupTools(groupName string, tools []string) error {
 
 // AddAppToGroup adds an app to a group, creating the group if it doesn't exist
 func AddAppToGroup(groupName string, appName string) error {
-	return withConfigAndSave(func(config *AnvilConfig) error {
-		ensureMap(&config.Groups)
-
-		if tools, exists := config.Groups[groupName]; exists {
-			for _, tool := range tools {
-				if tool == appName {
-					return nil
-				}
-			}
-			config.Groups[groupName] = append(tools, appName)
-		} else {
-			config.Groups[groupName] = []string{appName}
-		}
-		return nil
-	})
+	return AddAppsToGroup(groupName, []string{appName})
 }
 
 // AddAppsToGroup adds multiple apps to a group in a single operation
 func AddAppsToGroup(groupName string, apps []string) error {
 	return withConfigAndSave(func(config *AnvilConfig) error {
-		ensureMap(&config.Groups)
-
-		var groupTools []string
-		if tools, exists := config.Groups[groupName]; exists {
-			groupTools = tools
-		} else {
-			groupTools = []string{}
+		// Initialize map if nil (more idiomatic/performant than reflection-based ensureMap)
+		if config.Groups == nil {
+			config.Groups = make(map[string][]string)
 		}
 
-		existingMap := make(map[string]bool)
-		for _, tool := range groupTools {
-			existingMap[tool] = true
+		tools := config.Groups[groupName]
+
+		// Use a set to track existing tools for O(1) lookups and deduplication
+		// map[string]struct{} is idiomatic for sets (0 bytes per value)
+		existingSet := make(map[string]struct{}, len(tools))
+		for _, tool := range tools {
+			existingSet[tool] = struct{}{}
 		}
 
 		for _, app := range apps {
-			if !existingMap[app] {
-				groupTools = append(groupTools, app)
-				existingMap[app] = true
+			if _, exists := existingSet[app]; !exists {
+				tools = append(tools, app)
+				existingSet[app] = struct{}{}
 			}
 		}
 
-		config.Groups[groupName] = groupTools
+		config.Groups[groupName] = tools
 		return nil
 	})
 }

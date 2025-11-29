@@ -35,7 +35,7 @@ Save hours in your process — install the tools you need, sync your configs, an
 
 | Command | Description |
 |---------|-------------|
-| `anvil init` | Initialize your Anvil environment & dependencies |
+| `anvil init [--discover]` | Initialize your Anvil environment, dependencies & optionally discovers apps in your system|
 | `anvil doctor` | Check system health |
 | `anvil install [group-name]` | Install tools by groups|
 | `anvil config show [app-name]` | Show your anvil settings or app settings |
@@ -89,7 +89,7 @@ anvil config sync neovim
 
 ## Key Features
 
-- **Smart Installation** - Install individual apps or predefined groups(`dev`, `essentials`, etc) holding many apps
+- **Smart Installation** - Install individual apps or user-defined groups(`dev`, `essentials`, etc) holding many apps
 - **Group Import** - Import groups from local files or URLs with validation and conflict detection
 - **Auto-tracking** - Automatically tracks installed apps and prevents duplicates
 - **Secure Config Sync** - Uses private GitHub repositories with automatic backups

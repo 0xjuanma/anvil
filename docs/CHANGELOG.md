@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [2.7.0] - 2025-11-29
+
+### Added
 - **App Discovery Init Feature** - New `--discover` flag for `anvil init` command to automatically discover installed applications and tools
 
 ### Changed

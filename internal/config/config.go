@@ -308,6 +308,35 @@ func AddAppToGroup(groupName string, appName string) error {
 	})
 }
 
+// AddAppsToGroup adds multiple apps to a group in a single operation
+func AddAppsToGroup(groupName string, apps []string) error {
+	return withConfigAndSave(func(config *AnvilConfig) error {
+		ensureMap(&config.Groups)
+
+		var groupTools []string
+		if tools, exists := config.Groups[groupName]; exists {
+			groupTools = tools
+		} else {
+			groupTools = []string{}
+		}
+
+		existingMap := make(map[string]bool)
+		for _, tool := range groupTools {
+			existingMap[tool] = true
+		}
+
+		for _, app := range apps {
+			if !existingMap[app] {
+				groupTools = append(groupTools, app)
+				existingMap[app] = true
+			}
+		}
+
+		config.Groups[groupName] = groupTools
+		return nil
+	})
+}
+
 // CheckEnvironmentConfigurations checks local environment configurations
 func CheckEnvironmentConfigurations() []string {
 	var warnings []string

@@ -358,19 +358,6 @@ func installSingleTool(toolName string) error {
 		}
 	}
 
-	// Handle special cases for specific tools
-	if toolName == "zsh" {
-		spinner := charm.NewLineSpinner("Installing Oh My Zsh")
-		spinner.Start()
-		ohMyZshScript := `sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended`
-		if err := runPostInstallScript(ohMyZshScript); err != nil {
-			spinner.Warning("Oh My Zsh setup skipped")
-			o.PrintWarning("Post-install script failed for %s: %v", toolName, err)
-		} else {
-			spinner.Success("Oh My Zsh installed successfully")
-		}
-	}
-
 	// Handle config check for git
 	if toolName == "git" {
 		if err := checkToolConfiguration(toolName); err != nil {

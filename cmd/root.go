@@ -64,16 +64,16 @@ func showWelcomeBanner() {
 	fmt.Println(charm.RenderBox("", bannerContent, "#FF6B9D", true))
 
 	quickStart := `
-  anvil init              					Initialize your environment
-  anvil install essentials/[group-name]	   Install essential tools
-  anvil doctor            					Check system health
-  anvil config show       					Show your anvil settings
-  anvil config push [app-name]				Push your app configurations to GitHub
-  anvil config pull [app-name]				Pull your app configurations from GitHub
-  anvil config sync [app-name]				Sync your app configurations to your local machine
-  anvil clean              					Clean your anvil environment
-  anvil update             					Update your anvil installation
-  anvil version            					Show the version of anvil
+  anvil init [--discover]				  Initialize your environment and discover installed apps
+  anvil install essentials/[group-name]    Install specific group
+  anvil doctor							 Check system health and list available checks
+  anvil config show [app-name]			 Show your anvil settings or app settings
+  anvil config push [app-name]			 Push your app configurations to GitHub
+  anvil config pull [app-name]			 Pull your app configurations from GitHub
+  anvil config sync [app-name]			 Sync your app configurations to your local machine
+  anvil clean							  Clean your anvil environment
+  anvil update							 Update your anvil installation
+  anvil version							Show the version of anvil
 `
 	fmt.Println(charm.RenderBox("Quick Start", quickStart, "#00D9FF", false))
 

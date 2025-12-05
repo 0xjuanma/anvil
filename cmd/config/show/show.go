@@ -44,6 +44,7 @@ var ShowCmd = &cobra.Command{
 	Example: `  anvil config show                    # Show full anvil settings
   anvil config show --groups          # Show only groups
   anvil config show --configs         # Show only config sources
+  anvil config show --sources         # Show only installation sources
   anvil config show --git             # Show only git configuration
   anvil config show --github          # Show only GitHub configuration
   anvil config show myapp             # Show pulled configuration for 'myapp'`,
@@ -53,6 +54,7 @@ func init() {
 	ShowCmd.Flags().Bool("raw", false, "Show raw file content without formatting")
 	ShowCmd.Flags().BoolP("groups", "g", false, "Show only groups (only applicable for anvil settings)")
 	ShowCmd.Flags().BoolP("configs", "c", false, "Show only config source directories (only applicable for anvil settings)")
+	ShowCmd.Flags().BoolP("sources", "s", false, "Show only installation sources (only applicable for anvil settings)")
 	ShowCmd.Flags().Bool("git", false, "Show only git configuration (only applicable for anvil settings)")
 	ShowCmd.Flags().Bool("github", false, "Show only GitHub configuration (only applicable for anvil settings)")
 }
@@ -62,14 +64,15 @@ func runShowCommand(cmd *cobra.Command, args []string) error {
 	raw, _ := cmd.Flags().GetBool("raw")
 	groups, _ := cmd.Flags().GetBool("groups")
 	configs, _ := cmd.Flags().GetBool("configs")
+	sources, _ := cmd.Flags().GetBool("sources")
 	git, _ := cmd.Flags().GetBool("git")
 	github, _ := cmd.Flags().GetBool("github")
 
 	// If no arguments provided, show the anvil config file
 	if len(args) == 0 {
 		// Check if any specific section flags are set
-		if groups || configs || git || github {
-			return showAnvilSettingsSection(groups, configs, git, github)
+		if groups || configs || sources || git || github {
+			return showAnvilSettingsSection(groups, configs, sources, git, github)
 		}
 		return showAnvilSettings(raw)
 	}

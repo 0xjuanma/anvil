@@ -1,6 +1,6 @@
 Output anvil-demo.gif
 Set FontSize 14
-Set Width 1200
+Set Width 1100
 Set Height 800
 Set Theme "Darkside"
 

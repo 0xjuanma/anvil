@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Config Show Sources Flag** - New `--sources/-s` flag for `anvil config show` command to display only installation sources section
 
 ### Changed
 

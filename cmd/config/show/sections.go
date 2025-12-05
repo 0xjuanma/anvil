@@ -30,7 +30,7 @@ import (
 )
 
 // showAnvilSettingsSection displays specific sections of the anvil settings
-func showAnvilSettingsSection(showGroups, showConfigs, showGit, showGitHub bool) error {
+func showAnvilSettingsSection(showGroups, showConfigs, showSources, showGit, showGitHub bool) error {
 	o := palantir.GetGlobalOutputHandler()
 
 	// Stage 1: Locate settings file
@@ -56,6 +56,10 @@ func showAnvilSettingsSection(showGroups, showConfigs, showGit, showGitHub bool)
 		}
 	case showConfigs:
 		if err := showConfigsSection(anvilConfig); err != nil {
+			return err
+		}
+	case showSources:
+		if err := showSourcesSection(anvilConfig); err != nil {
 			return err
 		}
 	case showGit:
@@ -103,6 +107,27 @@ func showConfigsSection(anvilConfig *config.AnvilConfig) error {
 	fmt.Println()
 	fmt.Println("  💡 Use 'anvil config push <app-name>' to push source directories")
 	fmt.Println("  💡 Use 'anvil config pull <app-name>' to pull configurations")
+	fmt.Println()
+
+	return nil
+}
+
+// showSourcesSection displays the installation sources section
+func showSourcesSection(anvilConfig *config.AnvilConfig) error {
+	var boxContent strings.Builder
+
+	if len(anvilConfig.Sources) == 0 {
+		boxContent.WriteString("  No installation sources configured.\n")
+		boxContent.WriteString("  Add sources to your settings.yaml to configure installation URLs or commands.\n")
+	} else {
+		for appName, url := range anvilConfig.Sources {
+			boxContent.WriteString(fmt.Sprintf("    %s: %s\n", utils.ColorAppName(appName), url))
+		}
+	}
+
+	fmt.Println(charm.RenderBox("Installation Sources", boxContent.String(), "#E0C867", false))
+	fmt.Println()
+	fmt.Println("  💡 Sources map app names to their installation URLs or commands")
 	fmt.Println()
 
 	return nil

@@ -4,7 +4,7 @@ Anvil's configuration management system syncs dotfiles and configuration files a
 
 ## Security Requirement
 
-**Anvil REQUIRES private repositories for configuration management.**
+> **Note:** Anvil *requires* private repositories for configuration management.
 
 Configuration files contain sensitive data (API keys, tokens, personal paths, system information, authentication data) that must never be exposed publicly. Anvil blocks all pushes to public repositories and verifies privacy before every push.
 

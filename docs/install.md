@@ -13,7 +13,7 @@ anvil install [app-name|group-name] [flags]
 - `--list`: Show available groups and tracked apps
 - `--tree`: View applications in hierarchical tree format
 - `--dry-run`: Preview installations before execution
-- `--group-name`: Add installed app to a specific group
+- `--group-name`: Add installed app to a specific group(new or existing)
 
 ## Installation Modes
 

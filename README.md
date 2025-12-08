@@ -22,30 +22,15 @@ Save hours in your process — install the tools you need, sync your configs, an
 
 ## What Anvil Does
 
-- **🚀 Batch App Installation** - Install development tools in groups or individually via Homebrew
-- **🔄 Configuration Sync** - Sync dotfiles across machines using simple commands and private GitHub repositories  
-- **🩺 Health Checks** - Auto-diagnose and fix common setup issues
+- **Batch App Installation**: Install development tools in groups or individually via Homebrew
+- **Configuration Sync**: Sync dotfiles across machines using simple commands and private GitHub repositories  
+- **Health Checks**: Auto-diagnose and fix common setup issues
 
 ## Why Choose Anvil?
-- **Fast Setup** - Get coding in minutes, not hours
-- **Consistency** - Same configs and tools across all machines
-- **Built-in Safety** - Dry-run mode, private repo enforcement and automatic backups
 
-## Available Commands
-
-| Command | Description |
-|---------|-------------|
-| `anvil init [--discover]` | Initialize your Anvil environment, dependencies & optionally discovers apps in your system|
-| `anvil doctor` | Check system health |
-| `anvil install [group-name]` | Install tools by groups|
-| `anvil config show [app-name]` | Show your anvil settings or app settings |
-| `anvil config push [app-name]` | Push your app configurations to GitHub |
-| `anvil config pull [app-name]` | Pull your app configurations from GitHub |
-| `anvil config sync [app-name]` | Sync your pulled app configurations to your local machine |
-| `anvil clean` | Clean your anvil environment |
-| `anvil update` | Update your anvil installation |
-| `anvil version` | Show the version of anvil |
-
+- **Fast Setup**: Get coding in minutes, not hours
+- **Consistency**: Same configs and tools across all machines
+- **Built-in Safety**: Dry-run mode, private repo enforcement and automatic backups
 
 ## Quick Start
 
@@ -60,6 +45,21 @@ curl -sSL https://github.com/0xjuanma/anvil/releases/latest/download/install.sh 
 ```bash
 anvil update
 ```
+
+### Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `anvil init [--discover]` | Initialize your Anvil environment, dependencies & optionally discovers apps in your system|
+| `anvil doctor` | Check system health |
+| `anvil install [group-name]` | Install tools by groups|
+| `anvil config show [app-name]` | Show your anvil settings or app settings |
+| `anvil config push [app-name]` | Push your app configurations to GitHub |
+| `anvil config pull [app-name]` | Pull your app configurations from GitHub |
+| `anvil config sync [app-name]` | Sync your pulled app configurations to your local machine |
+| `anvil clean` | Clean your anvil environment |
+| `anvil update` | Update your anvil installation |
+| `anvil version` | Show the version of anvil |
 
 
 ### Try It Out
@@ -87,14 +87,14 @@ anvil config pull neovim
 anvil config sync neovim
 ```
 
-## Key Features
+## Features
 
-- **Smart Installation** - Install individual apps or user-defined groups(`dev`, `essentials`, etc) holding many apps
-- **Group Import** - Import groups from local files or URLs with validation and conflict detection
-- **Auto-tracking** - Automatically tracks installed apps and prevents duplicates
-- **Secure Config Sync** - Uses private GitHub repositories with automatic backups
-- **Health Diagnostics** - `anvil doctor` detects and auto-fixes common issues
-- **Zero Configuration** - Works out of the box with sensible defaults
+- **Smart Installation**: Install individual apps or user-defined groups (`dev`, `essentials`, etc) holding many apps
+- **Group Import**: Import groups from local files or URLs with validation and conflict detection
+- **Auto-tracking**: Automatically tracks installed apps and prevents duplicates
+- **Secure Config Sync**: Uses private GitHub repositories with automatic backups
+- **Health Diagnostics**: `anvil doctor` detects and auto-fixes common issues
+- **Zero Configuration**: Works out of the box with sensible defaults
 
 ## Documentation
 
@@ -114,6 +114,6 @@ anvil config sync neovim
 One CLI to rule them all.
 
 **Author:** [@0xjuanma](https://github.com/0xjuanma)  
-**[⭐ Star this project](https://github.com/0xjuanma/anvil)**
+**[Star this project](https://github.com/0xjuanma/anvil)**
 
 </div>

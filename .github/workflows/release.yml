@@ -66,7 +66,7 @@ jobs:
         sed '/./,$!d' temp_release_notes.md > release_notes_content.md
         
         # Create formatted release notes with header
-        echo "## 🎉 Anvil ${{ steps.version.outputs.VERSION }}" > formatted_release_notes.md
+        echo "## Anvil CLI ${{ steps.version.outputs.VERSION }}" > formatted_release_notes.md
         echo "" >> formatted_release_notes.md
         
         # Add the changelog content
@@ -74,20 +74,20 @@ jobs:
         
         # Add the installation section
         echo "" >> formatted_release_notes.md
-        echo "### 🚀 Get Started in 30 Seconds" >> formatted_release_notes.md
+        echo "---" >> formatted_release_notes.md
+        echo "### Update Your Installation" >> formatted_release_notes.md
+        echo "" >> formatted_release_notes.md
         echo '```bash' >> formatted_release_notes.md
-        echo 'curl -sSL https://github.com/0xjuanma/anvil/releases/latest/download/install.sh | bash' >> formatted_release_notes.md
-        echo 'anvil --version' >> formatted_release_notes.md
-        echo 'anvil init && anvil install essentials' >> formatted_release_notes.md
+        echo 'anvil update' >> formatted_release_notes.md
         echo '```' >> formatted_release_notes.md
         echo "" >> formatted_release_notes.md
-        echo "### 💬 Join the Community" >> formatted_release_notes.md
-        echo "- 🌟 [Star us on GitHub](https://github.com/0xjuanma/anvil)" >> formatted_release_notes.md
-        echo "- 🐛 [Report issues](https://github.com/0xjuanma/anvil/issues)" >> formatted_release_notes.md
+        echo "### Join the Community" >> formatted_release_notes.md
+        echo "- [Star us on GitHub](https://github.com/0xjuanma/anvil)" >> formatted_release_notes.md
+        echo "- [Report issues](https://github.com/0xjuanma/anvil/issues)" >> formatted_release_notes.md
         echo "" >> formatted_release_notes.md
         echo "---" >> formatted_release_notes.md
         echo "" >> formatted_release_notes.md
-        echo "**📋 Checksums:** See \`checksums.txt\` for file verification" >> formatted_release_notes.md
+        echo "**Checksums:** See \`checksums.txt\` for file verification" >> formatted_release_notes.md
         
         # Set as output using the multiline format
         echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
@@ -110,7 +110,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.version.outputs.VERSION }}
-        name: Anvil ${{ steps.version.outputs.VERSION }}
+        name: 🔨 Anvil CLI ${{ steps.version.outputs.VERSION }}
         body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
         files: |
           dist/anvil-darwin-amd64

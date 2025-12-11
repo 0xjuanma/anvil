@@ -61,8 +61,7 @@ var InstallCmd = &cobra.Command{
 			// Load and prepare data once
 			groups, builtInGroupNames, customGroupNames, installedApps, err := tools.LoadAndPrepareAppData()
 			if err != nil {
-				palantir.GetGlobalOutputHandler().PrintError("Failed to load application data: %v", err)
-				return
+				return fmt.Errorf("failed to load application data: %w", err)
 			}
 
 			// Choose rendering based on flag
@@ -78,11 +77,11 @@ var InstallCmd = &cobra.Command{
 
 			// Display in box
 			fmt.Println(charm.RenderBox(title, content, "#00D9FF", false))
-			return
+			return nil
 		}
 
 		if len(args) == 0 {
-			return nil
+			return fmt.Errorf("target required (group name or app name)")
 		}
 		return runInstallCommand(cmd, args[0])
 	},
@@ -211,10 +210,10 @@ type toolStatus struct {
 }
 
 const (
-	toolStatusPending   = "pending"
+	toolStatusPending    = "pending"
 	toolStatusInstalling = "installing"
-	toolStatusDone      = "done"
-	toolStatusFailed    = "failed"
+	toolStatusDone       = "done"
+	toolStatusFailed     = "failed"
 )
 
 // installGroupSerial installs tools serially using unified installation logic.
@@ -270,18 +269,18 @@ func printInstallDashboard(groupName string, statuses []toolStatus, current, tot
 	content.WriteString("\n")
 
 	// Show each tool with its status
-		for i, status := range statuses {
-			var statusText string
-			switch status.status {
-			case toolStatusDone:
-				statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Installed")
-			case toolStatusFailed:
-				statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Failed")
-			case toolStatusInstalling:
-				statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Installing...")
-			default:
-				statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Pending")
-			}
+	for i, status := range statuses {
+		var statusText string
+		switch status.status {
+		case toolStatusDone:
+			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Installed")
+		case toolStatusFailed:
+			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Failed")
+		case toolStatusInstalling:
+			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Installing...")
+		default:
+			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Pending")
+		}
 
 		content.WriteString(fmt.Sprintf("  [%d/%d] %s\n", i+1, total, statusText))
 	}
@@ -468,7 +467,6 @@ func checkGitConfiguration() error {
 	}
 	return nil
 }
-
 
 func init() {
 	// Add flags for additional functionality

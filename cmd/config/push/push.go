@@ -295,29 +295,46 @@ func performPushOperation(ctx context.Context, opts PushOperationOptions) error 
 	return nil
 }
 
+// executeCommonPushStagesForAnvil executes common stages for anvil config push.
+func executeCommonPushStagesForAnvil(anvilConfig *config.AnvilConfig, settingsPath, remotePath string, ctx context.Context) (*github.GitHubClient, *github.DiffSummary, error) {
+	output := palantir.GetGlobalOutputHandler()
+
+	// Security warning
+	showSecurityWarning(anvilConfig.GitHub.ConfigRepo)
+
+	// Authentication setup
+	githubClient, err := setupAuthentication(anvilConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Prepare and show diff
+	output.PrintStage(constants.SpinnerAnalyzingChanges)
+	diffSummary, err := githubClient.GetDiffPreview(ctx, settingsPath, remotePath)
+	if err != nil {
+		output.PrintWarning("Unable to generate diff preview: %v", err)
+	} else {
+		showDiffOutput(diffSummary)
+	}
+
+	// User confirmation
+	output.PrintStage("Requesting user confirmation...")
+	if !output.Confirm("Do you want to push your anvil settings to the repository?") {
+		output.PrintInfo("Push cancelled by user")
+		cleanupOnError(ctx, githubClient, nil)
+		return nil, nil, nil
+	}
+
+	return githubClient, diffSummary, nil
+}
+
 // pushAnvilConfig pushes the anvil settings.yaml to the repository.
 func pushAnvilConfig() error {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintHeader("Push Anvil Configuration")
 
 	// Stage 1: Load and validate configuration
-	output.PrintStage(constants.SpinnerLoadingConfig)
-	anvilConfig, err := config.LoadConfig()
-	if err != nil {
-		return errors.NewConfigurationError(constants.OpPush, "load-config", err)
-	}
-
-	// Validate GitHub configuration
-	if anvilConfig.GitHub.ConfigRepo == "" {
-		return errors.NewConfigurationError(constants.OpPush, "missing-repo",
-			fmt.Errorf(constants.ErrGitHubRepoNotSet, constants.ANVIL_CONFIG_FILE))
-	}
-	output.PrintSuccess("Configuration loaded successfully")
-
-	showSecurityWarning(anvilConfig.GitHub.ConfigRepo)
-
-	// Stage 2: Authentication setup
-	githubClient, err := setupAuthentication(anvilConfig)
+	anvilConfig, err := loadAndValidateConfig()
 	if err != nil {
 		return err
 	}
@@ -330,23 +347,15 @@ func pushAnvilConfig() error {
 	output.PrintInfo("Branch: %s", anvilConfig.GitHub.Branch)
 	output.PrintInfo("Settings file: %s", settingsPath)
 
-	// NEW: Add diff output before confirmation
-	output.PrintStage(constants.SpinnerAnalyzingChanges)
+	// Common push workflow stages
 	ctx := context.Background()
 	anvilSettingsPath := fmt.Sprintf("%s/%s", constants.ANVIL_CONFIG_DIR, constants.ANVIL_CONFIG_FILE)
-	diffSummary, err := githubClient.GetDiffPreview(ctx, settingsPath, anvilSettingsPath[1:])
+	githubClient, diffSummary, err := executeCommonPushStagesForAnvil(anvilConfig, settingsPath, anvilSettingsPath[1:], ctx)
 	if err != nil {
-		output.PrintWarning("Unable to generate diff preview: %v", err)
-	} else {
-		showDiffOutput(diffSummary)
+		return err
 	}
-
-	// Stage 3: User confirmation
-	output.PrintStage("Requesting user confirmation...")
-	if !output.Confirm("Do you want to push your anvil settings to the repository?") {
-		output.PrintInfo("Push cancelled by user")
-		cleanupOnError(ctx, githubClient, nil)
-		return nil
+	if githubClient == nil || diffSummary == nil {
+		return nil // User cancelled
 	}
 
 	// Stage 4: Push configuration

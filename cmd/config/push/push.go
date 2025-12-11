@@ -251,6 +251,16 @@ func handleUserConfirmation(output palantir.OutputHandler, appName string, githu
 	return true
 }
 
+// cleanupOnError handles cleanup of staged changes when an error occurs.
+func cleanupOnError(ctx context.Context, client *github.GitHubClient, err error) error {
+	if err != nil {
+		if cleanupErr := client.CleanupStagedChanges(ctx); cleanupErr != nil {
+			palantir.GetGlobalOutputHandler().PrintWarning("Failed to cleanup staged changes: %v", cleanupErr)
+		}
+	}
+	return err
+}
+
 // performPushOperation executes the actual push operation.
 func performPushOperation(ctx context.Context, opts PushOperationOptions) error {
 	output := palantir.GetGlobalOutputHandler()
@@ -258,11 +268,7 @@ func performPushOperation(ctx context.Context, opts PushOperationOptions) error 
 
 	result, err := opts.GitHubClient.PushAppConfig(ctx, opts.AppName, opts.ConfigPath)
 	if err != nil {
-		// Clean up any staged changes in case of error
-		if cleanupErr := opts.GitHubClient.CleanupStagedChanges(ctx); cleanupErr != nil {
-			output.PrintWarning("Failed to cleanup staged changes after error: %v", cleanupErr)
-		}
-		return errors.NewInstallationError(constants.OpPush, "push-app-config", err)
+		return cleanupOnError(ctx, opts.GitHubClient, errors.NewInstallationError(constants.OpPush, "push-app-config", err))
 	}
 
 	// Check if no changes were detected (result will be nil)
@@ -297,28 +303,10 @@ func pushAnvilConfig() error {
 	showSecurityWarning(anvilConfig.GitHub.ConfigRepo)
 
 	// Stage 2: Authentication setup
-	output.PrintStage("Setting up authentication...")
-	var token string
-	if anvilConfig.GitHub.TokenEnvVar != "" {
-		token = os.Getenv(anvilConfig.GitHub.TokenEnvVar)
-		if token == "" {
-			output.PrintWarning("GitHub token not found in environment variable: %s", anvilConfig.GitHub.TokenEnvVar)
-			output.PrintInfo("Proceeding with SSH authentication if available...\n")
-		} else {
-			output.PrintSuccess("GitHub token found in environment\n")
-		}
+	githubClient, err := setupAuthentication(anvilConfig)
+	if err != nil {
+		return err
 	}
-
-	// Create GitHub client
-	githubClient := github.NewGitHubClient(
-		anvilConfig.GitHub.ConfigRepo,
-		anvilConfig.GitHub.Branch,
-		anvilConfig.GitHub.LocalPath,
-		token,
-		anvilConfig.Git.SSHKeyPath,
-		anvilConfig.Git.Username,
-		anvilConfig.Git.Email,
-	)
 
 	// Get settings file path
 	settingsPath := config.GetAnvilConfigPath()
@@ -343,10 +331,7 @@ func pushAnvilConfig() error {
 	output.PrintStage("Requesting user confirmation...")
 	if !output.Confirm("Do you want to push your anvil settings to the repository?") {
 		output.PrintInfo("Push cancelled by user")
-		// Clean up any staged changes from the diff preview
-		if cleanupErr := githubClient.CleanupStagedChanges(ctx); cleanupErr != nil {
-			output.PrintWarning("Failed to cleanup staged changes: %v", cleanupErr)
-		}
+		cleanupOnError(ctx, githubClient, nil)
 		return nil
 	}
 
@@ -355,11 +340,7 @@ func pushAnvilConfig() error {
 	result, err := githubClient.PushAnvilConfig(ctx, settingsPath)
 	if err != nil {
 		output.PrintError("Push failed: %v", err)
-		// Clean up any staged changes in case of error
-		if cleanupErr := githubClient.CleanupStagedChanges(ctx); cleanupErr != nil {
-			output.PrintWarning("Failed to cleanup staged changes after error: %v", cleanupErr)
-		}
-		return errors.NewInstallationError(constants.OpPush, "push-config", err)
+		return cleanupOnError(ctx, githubClient, errors.NewInstallationError(constants.OpPush, "push-config", err))
 	}
 
 	// Check if no changes were detected (result will be nil)

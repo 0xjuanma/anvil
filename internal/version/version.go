@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package version provides version management for the Anvil CLI.
+// The version is typically set at build time and can be retrieved at runtime.
 package version
 
 // appVersion holds the application version set at build time
@@ -24,7 +26,7 @@ func SetVersion(v string) {
 	appVersion = v
 }
 
-// GetVersion returns the current application version
-func GetVersion() string {
+// Version returns the current application version
+func Version() string {
 	return appVersion
 }

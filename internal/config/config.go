@@ -192,7 +192,7 @@ func CreateDirectories() error {
 
 // GenerateDefaultSettings generates the default settings.yaml file
 func GenerateDefaultSettings() error {
-	return GenerateDefaultSettingsWithVersion(version.GetVersion())
+	return GenerateDefaultSettingsWithVersion(version.Version())
 }
 
 // GenerateDefaultSettingsWithVersion generates the default settings.yaml file with a specific version

@@ -61,15 +61,16 @@ func TestPerformSync_SingleFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := performSync(
-		"test-sync",
-		sourceFile,
-		destFile,
-		"Confirm sync?",
-		"Syncing...",
-		"Synced",
-		"Success",
-	)
+	opts := SyncOptions{
+		ArchivePrefix:  "test-sync",
+		SourcePath:     sourceFile,
+		DestPath:       destFile,
+		ConfirmMsg:     "Confirm sync?",
+		SpinnerMsg:     "Syncing...",
+		SpinnerSuccess: "Synced",
+		SuccessMsg:     "Success",
+	}
+	err := performSync(opts)
 
 	if err != nil {
 		t.Fatalf("performSync failed: %v", err)

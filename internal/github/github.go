@@ -221,39 +221,45 @@ func (gc *GitHubClient) ValidateRepository(ctx context.Context) error {
 	return nil
 }
 
-// getCloneURL returns the appropriate clone URL based on available authentication
-func (gc *GitHubClient) getCloneURL() string {
-	if gc.Token != "" {
+// BuildAuthenticatedURL creates an authenticated Git URL from repository URL, token, and SSH key path.
+// This is a shared function used by both GitHubClient and validators to avoid duplication.
+func BuildAuthenticatedURL(repoURL, token, sshKeyPath string) string {
+	if token != "" {
 		// Use HTTPS with token
-		if strings.HasPrefix(gc.RepoURL, "https://") {
-			return strings.Replace(gc.RepoURL, "https://", fmt.Sprintf("https://%s@", gc.Token), 1)
+		if strings.HasPrefix(repoURL, "https://") {
+			return strings.Replace(repoURL, "https://", fmt.Sprintf("https://%s@", token), 1)
 		}
 		// Convert repo format like "username/repo" to HTTPS with token
-		if !strings.Contains(gc.RepoURL, "://") {
-			return fmt.Sprintf("https://%s@github.com/%s.git", gc.Token, gc.RepoURL)
+		if !strings.Contains(repoURL, "://") {
+			return fmt.Sprintf("https://%s@github.com/%s.git", token, repoURL)
 		}
 	}
 
 	// Use SSH if available
-	if gc.SSHKeyPath != "" {
-		if _, err := os.Stat(gc.SSHKeyPath); err == nil {
+	if sshKeyPath != "" {
+		if _, err := os.Stat(sshKeyPath); err == nil {
 			// Convert to SSH format
-			if strings.HasPrefix(gc.RepoURL, "https://github.com/") {
-				repoPath := strings.TrimPrefix(gc.RepoURL, "https://github.com/")
+			if strings.HasPrefix(repoURL, "https://github.com/") {
+				repoPath := strings.TrimPrefix(repoURL, "https://github.com/")
 				repoPath = strings.TrimSuffix(repoPath, ".git")
 				return fmt.Sprintf("git@github.com:%s.git", repoPath)
 			}
-			if !strings.Contains(gc.RepoURL, "://") {
-				return fmt.Sprintf("git@github.com:%s.git", gc.RepoURL)
+			if !strings.Contains(repoURL, "://") {
+				return fmt.Sprintf("git@github.com:%s.git", repoURL)
 			}
 		}
 	}
 
 	// Default to HTTPS
-	if !strings.Contains(gc.RepoURL, "://") {
-		return fmt.Sprintf("https://github.com/%s.git", gc.RepoURL)
+	if !strings.Contains(repoURL, "://") {
+		return fmt.Sprintf("https://github.com/%s.git", repoURL)
 	}
-	return gc.RepoURL
+	return repoURL
+}
+
+// getCloneURL returns the appropriate clone URL based on available authentication
+func (gc *GitHubClient) getCloneURL() string {
+	return BuildAuthenticatedURL(gc.RepoURL, gc.Token, gc.SSHKeyPath)
 }
 
 // configureGitUser configures git user for the repository

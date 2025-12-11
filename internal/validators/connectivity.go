@@ -23,43 +23,10 @@ import (
 	"strings"
 
 	"github.com/0xjuanma/anvil/internal/config"
+	"github.com/0xjuanma/anvil/internal/github"
 	"github.com/0xjuanma/anvil/internal/system"
 )
 
-// buildAuthenticatedURL creates an authenticated Git URL using the same logic as GitHubClient
-func buildAuthenticatedURL(repoURL, token, sshKeyPath string) string {
-	if token != "" {
-		// Use HTTPS with token
-		if strings.HasPrefix(repoURL, "https://") {
-			return strings.Replace(repoURL, "https://", fmt.Sprintf("https://%s@", token), 1)
-		}
-		// Convert repo format like "username/repo" to HTTPS with token
-		if !strings.Contains(repoURL, "://") {
-			return fmt.Sprintf("https://%s@github.com/%s.git", token, repoURL)
-		}
-	}
-
-	// Use SSH if available
-	if sshKeyPath != "" {
-		if _, err := os.Stat(sshKeyPath); err == nil {
-			// Convert to SSH format
-			if strings.HasPrefix(repoURL, "https://github.com/") {
-				repoPath := strings.TrimPrefix(repoURL, "https://github.com/")
-				repoPath = strings.TrimSuffix(repoPath, ".git")
-				return fmt.Sprintf("git@github.com:%s.git", repoPath)
-			}
-			if !strings.Contains(repoURL, "://") {
-				return fmt.Sprintf("git@github.com:%s.git", repoURL)
-			}
-		}
-	}
-
-	// Default to HTTPS
-	if !strings.Contains(repoURL, "://") {
-		return fmt.Sprintf("https://github.com/%s.git", repoURL)
-	}
-	return repoURL
-}
 
 // GitHubAccessValidator checks if GitHub API is accessible
 type GitHubAccessValidator struct{}
@@ -188,7 +155,7 @@ func (v *RepositoryValidator) Validate(ctx context.Context, cfg *config.AnvilCon
 	}
 
 	// Create authenticated URL using the same logic as GitHubClient
-	authenticatedURL := buildAuthenticatedURL(cfg.GitHub.ConfigRepo, token, cfg.Git.SSHKeyPath)
+	authenticatedURL := github.BuildAuthenticatedURL(cfg.GitHub.ConfigRepo, token, cfg.Git.SSHKeyPath)
 	result, err := system.RunCommand("git", "ls-remote", authenticatedURL, "HEAD")
 
 	if err != nil || !result.Success {

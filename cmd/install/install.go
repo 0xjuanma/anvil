@@ -114,7 +114,7 @@ func runInstallCommand(cmd *cobra.Command, target string) error {
 	}
 
 	// Try to get group tools first
-	if tools, err := config.GetGroupTools(target); err == nil {
+	if tools, err := config.GroupTools(target); err == nil {
 		opts := InstallGroupOptions{
 			GroupName:  target,
 			Tools:      tools,

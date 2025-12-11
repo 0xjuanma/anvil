@@ -34,7 +34,7 @@ func showAnvilSettingsSection(showGroups, showConfigs, showSources, showGit, sho
 	o := palantir.GetGlobalOutputHandler()
 
 	// Stage 1: Locate settings file
-	configPath := config.GetAnvilConfigPath()
+	configPath := config.AnvilConfigPath()
 
 	// Check settings file
 	err := checkSettingsFileExists(o, configPath)

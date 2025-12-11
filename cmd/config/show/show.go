@@ -96,7 +96,7 @@ func showAnvilSettings(raw bool) error {
 	o := palantir.GetGlobalOutputHandler()
 
 	// Stage 1: Locate settings file
-	configPath := config.GetAnvilConfigPath()
+	configPath := config.AnvilConfigPath()
 
 	// Check settings file
 	err := checkSettingsFileExists(o, configPath)
@@ -157,7 +157,7 @@ func showPulledConfig(targetDir string) error {
 
 	// Stage 2: Locate pulled configuration directory
 	o.PrintStage("Locating pulled configuration directory...")
-	tempDir := filepath.Join(config.GetAnvilConfigDirectory(), "temp", targetDir)
+	tempDir := filepath.Join(config.AnvilConfigDirectory(), "temp", targetDir)
 
 	// Check if the directory exists
 	if _, err := os.Stat(tempDir); os.IsNotExist(err) {
@@ -169,7 +169,7 @@ func showPulledConfig(targetDir string) error {
 		fmt.Println("")
 
 		// Show available pulled configurations
-		tempBasePath := filepath.Join(config.GetAnvilConfigDirectory(), "temp")
+		tempBasePath := filepath.Join(config.AnvilConfigDirectory(), "temp")
 		if entries, err := os.ReadDir(tempBasePath); err == nil && len(entries) > 0 {
 			o.PrintInfo("Available pulled configurations:")
 			for _, entry := range entries {

@@ -76,8 +76,8 @@ func NewConcurrentInstaller(maxWorkers int, output palantir.OutputHandler, dryRu
 		maxWorkers:    maxWorkers,
 		output:        output,
 		dryRun:        dryRun,
-		timeout:       time.Minute * 10, // 10 minutes per tool
-		retryAttempts: 2,
+		timeout:       constants.ToolInstallTimeout,
+		retryAttempts: constants.DefaultRetryAttempts,
 	}
 }
 

@@ -99,15 +99,15 @@ func IsBrewInstalledAtPath() bool {
 	// Platform-specific Homebrew paths
 	if system.IsMacOS() {
 		brewPaths = []string{
-			"/opt/homebrew/bin/brew", // Apple Silicon
-			"/usr/local/bin/brew",    // Intel
+			constants.BrewPathAppleSilicon, // Apple Silicon
+			constants.BrewPathIntel,        // Intel
 		}
 	} else {
 		// Linux Homebrew paths
 		brewPaths = []string{
-			"/home/linuxbrew/.linuxbrew/bin/brew", // Standard Linux Homebrew
-			"~/.linuxbrew/bin/brew",               // User-local Linux Homebrew
-			"/opt/homebrew/bin/brew",              // Alternative Linux path
+			constants.BrewPathLinuxStandard, // Standard Linux Homebrew
+			constants.BrewPathLinuxUser,     // User-local Linux Homebrew
+			constants.BrewPathLinuxAlt,      // Alternative Linux path
 		}
 	}
 
@@ -146,7 +146,7 @@ func InstallBrew() error {
 
 	spinner := charm.NewDotsSpinner("Preparing Homebrew installation")
 	spinner.Start()
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(constants.SpinnerDelay)
 	spinner.Stop()
 
 	fmt.Print("\r\033[K→ Enter password when prompted: ")

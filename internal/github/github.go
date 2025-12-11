@@ -23,7 +23,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/0xjuanma/anvil/internal/constants"
 	"github.com/0xjuanma/anvil/internal/errors"
@@ -364,7 +363,7 @@ Example settings.yaml section:
 
 // getAvailableBranches attempts to list available branches from the remote repository
 func (gc *GitHubClient) getAvailableBranches() string {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.GitBranchTimeout)
 	defer cancel()
 
 	result, err := system.RunCommandWithTimeout(ctx, constants.GitCommand, "ls-remote", "--heads", gc.getCloneURL())

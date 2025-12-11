@@ -25,7 +25,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"time"
+
+	"github.com/0xjuanma/anvil/internal/constants"
 )
 
 // CommandResult represents the result of a command execution
@@ -37,9 +38,9 @@ type CommandResult struct {
 	Success  bool
 }
 
-// RunCommand executes a system command with a default timeout of 5 minutes
+// RunCommand executes a system command with a default timeout
 func RunCommand(command string, args ...string) (*CommandResult, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultCommandTimeout)
 	defer cancel()
 	return RunCommandWithTimeout(ctx, command, args...)
 }
@@ -91,7 +92,7 @@ func CommandPath(command string) (string, error) {
 
 // RunCommandInDirectory executes a command in a specific directory
 func RunCommandInDirectory(dir, command string, args ...string) (*CommandResult, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultCommandTimeout)
 	defer cancel()
 	return RunCommandInDirectoryWithTimeout(ctx, dir, command, args...)
 }

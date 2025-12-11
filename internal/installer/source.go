@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/0xjuanma/anvil/internal/config"
+	"github.com/0xjuanma/anvil/internal/constants"
 	"github.com/0xjuanma/anvil/internal/system"
 	"github.com/0xjuanma/anvil/internal/terminal/charm"
 	"github.com/0xjuanma/anvil/internal/utils"
@@ -182,7 +183,7 @@ func downloadFile(fileURL, appName string) (string, error) {
 	}
 
 	homeDir, _ := system.HomeDir()
-	downloadsDir := filepath.Join(homeDir, "Downloads", "anvil-downloads")
+	downloadsDir := filepath.Join(homeDir, constants.DownloadsDirName, constants.AnvilDownloadsSubdir)
 	if err := utils.EnsureDirectory(downloadsDir); err != nil {
 		return "", fmt.Errorf("failed to create downloads directory: %w", err)
 	}
@@ -223,14 +224,13 @@ func getExtensionFromURL(fileURL string) string {
 	parsedURL, err := url.Parse(fileURL)
 	if err == nil {
 		path := strings.ToLower(parsedURL.Path)
-		extensions := []string{".dmg", ".pkg", ".zip", ".tar.gz", ".deb", ".rpm", ".AppImage", ".tar.bz2"}
-		for _, ext := range extensions {
+		for _, ext := range constants.SupportedFileExtensions {
 			if strings.HasSuffix(path, ext) {
 				return ext
 			}
 		}
 	}
-	return ".zip"
+	return constants.ExtDefault
 }
 
 // installDownloadedFile installs the downloaded file based on its type and OS
@@ -248,14 +248,14 @@ func installOnMacOS(filePath, appName string) error {
 	ext := strings.ToLower(filepath.Ext(filePath))
 
 	switch ext {
-	case ".dmg":
+	case constants.ExtDMG:
 		return installDMG(filePath, appName)
-	case ".pkg":
+	case constants.ExtPKG:
 		return installPKG(filePath)
-	case ".zip":
+	case constants.ExtZIP:
 		return installZIP(filePath, appName)
 	default:
-		return fmt.Errorf("unsupported file type: %s (supported: .dmg, .pkg, .zip)", ext)
+		return fmt.Errorf("unsupported file type: %s (supported: %s, %s, %s)", ext, constants.ExtDMG, constants.ExtPKG, constants.ExtZIP)
 	}
 }
 
@@ -264,23 +264,23 @@ func installOnLinux(filePath, appName string) error {
 	ext := strings.ToLower(filepath.Ext(filePath))
 	baseName := strings.ToLower(filepath.Base(filePath))
 
-	if strings.HasSuffix(baseName, ".tar.gz") {
+	if strings.HasSuffix(baseName, constants.ExtTarGz) {
 		return installTarGz(filePath, appName)
-	} else if strings.HasSuffix(baseName, ".tar.bz2") {
+	} else if strings.HasSuffix(baseName, constants.ExtTarBz2) {
 		return installTarBz2(filePath, appName)
 	}
 
 	switch ext {
-	case ".deb":
+	case constants.ExtDEB:
 		return installDEB(filePath)
-	case ".rpm":
+	case constants.ExtRPM:
 		return installRPM(filePath)
-	case ".AppImage":
+	case constants.ExtAppImage:
 		return installAppImage(filePath, appName)
-	case ".zip":
+	case constants.ExtZIP:
 		return installZIP(filePath, appName)
 	default:
-		return fmt.Errorf("unsupported file type: %s (supported: .deb, .rpm, .AppImage, .zip, .tar.gz, .tar.bz2)", ext)
+		return fmt.Errorf("unsupported file type: %s (supported: %s, %s, %s, %s, %s, %s, %s)", ext, constants.ExtDEB, constants.ExtRPM, constants.ExtAppImage, constants.ExtZIP, constants.ExtTarGz, constants.ExtTarBz2)
 	}
 }
 

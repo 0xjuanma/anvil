@@ -67,7 +67,8 @@ type AnvilTools struct {
 	InstalledApps []string `yaml:"installed_apps"` // Tracks individually installed applications
 }
 
-// getCachedConfig returns the cached configuration or loads it if not cached
+// getCachedConfig returns the cached configuration or loads it if not cached.
+// Uses double-checked locking for thread-safe caching.
 func getCachedConfig() (*AnvilConfig, error) {
 	configCacheMutex.RLock()
 	if configCache != nil {
@@ -89,7 +90,8 @@ func getCachedConfig() (*AnvilConfig, error) {
 	return configCache, err
 }
 
-// withConfig executes a function with the cached config, handling common error patterns
+// withConfig executes a function with the cached config, handling common error patterns.
+// Returns an error if config loading fails or if the function returns an error.
 func withConfig(fn func(*AnvilConfig) error) error {
 	config, err := getCachedConfig()
 	if err != nil {
@@ -98,7 +100,8 @@ func withConfig(fn func(*AnvilConfig) error) error {
 	return fn(config)
 }
 
-// withConfigAndSave executes a function with the cached config and saves it
+// withConfigAndSave executes a function with the cached config and saves it.
+// Automatically saves the configuration after the function executes successfully.
 func withConfigAndSave(fn func(*AnvilConfig) error) error {
 	config, err := getCachedConfig()
 	if err != nil {
@@ -110,7 +113,8 @@ func withConfigAndSave(fn func(*AnvilConfig) error) error {
 	return SaveConfig(config)
 }
 
-// ensureMap initializes a map if it's nil
+// ensureMap initializes a map if it's nil.
+// Supports map[string][]string and map[string]string types.
 func ensureMap(m interface{}) {
 	switch v := m.(type) {
 	case *map[string][]string:

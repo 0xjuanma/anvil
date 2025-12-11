@@ -91,7 +91,8 @@ func IsBrewInstalled() bool {
 	return result
 }
 
-// IsBrewInstalledAtPath checks if Homebrew is installed at known paths
+// IsBrewInstalledAtPath checks if Homebrew is installed at known platform-specific paths.
+// Checks common installation locations before falling back to PATH lookup.
 func IsBrewInstalledAtPath() bool {
 	var brewPaths []string
 
@@ -379,7 +380,8 @@ func IsApplicationAvailable(packageName string) bool {
 	return false
 }
 
-// checkKnownCaskInApplications checks if a known cask app exists in /Applications
+// checkKnownCaskInApplications checks if a known cask app exists in /Applications.
+// Uses optimized app name generation for faster lookups.
 func checkKnownCaskInApplications(packageName string) bool {
 	// Use optimized app name generation for known casks
 	appNames := generateOptimizedAppNames(packageName)
@@ -391,7 +393,7 @@ func checkKnownCaskInApplications(packageName string) bool {
 	return false
 }
 
-// searchApplication checks if an app exists in /Applications
+// searchApplication checks if an app exists in /Applications directory.
 func searchApplication(appName string) bool {
 	result, err := system.RunCommand("test", "-d", fmt.Sprintf("/Applications/%s", appName))
 	if err == nil && result.Success {
@@ -417,7 +419,8 @@ func isKnownFormula(packageName string) bool {
 	return false
 }
 
-// generateOptimizedAppNames creates optimized app names for known packages
+// generateOptimizedAppNames creates optimized app names for known packages.
+// Uses special cases for common apps and fallback generation for others.
 func generateOptimizedAppNames(packageName string) []string {
 	// Use special cases first (most common)
 	specialCases := map[string][]string{
@@ -488,7 +491,8 @@ func generateOptimizedAppNames(packageName string) []string {
 	return names
 }
 
-// spotlightSearch uses macOS Spotlight to find applications system-wide
+// spotlightSearch uses macOS Spotlight to find applications system-wide.
+// This is the slowest availability check and is used as a last resort.
 func spotlightSearch(packageName string) bool {
 	// Use mdfind to search for applications containing the package name
 	query := fmt.Sprintf("kMDItemKind == 'Application' && kMDItemFSName == '*%s*'", packageName)

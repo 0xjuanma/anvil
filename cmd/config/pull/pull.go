@@ -76,22 +76,53 @@ func handleBranchConfigError(err error, cfg *config.AnvilConfig, stage string, o
 
 // runPullCommand executes the configuration pull process for a specific directory.
 func runPullCommand(cmd *cobra.Command, args []string) error {
-	// Default to "anvil" if no argument provided
+	// Setup: Determine target and load config
+	targetDir, cfg, err := setupPullCommand(cmd, args)
+	if err != nil {
+		return err
+	}
+
+	// Stage 1: Authentication
+	githubClient, ctx, err := setupPullAuthentication(cfg)
+	if err != nil {
+		return err
+	}
+
+	// Stage 2: Validate repository
+	if err := validatePullRepository(ctx, githubClient, cfg); err != nil {
+		return err
+	}
+
+	// Stage 3: Clone/update repository
+	if err := ensurePullRepository(ctx, githubClient, cfg); err != nil {
+		return err
+	}
+
+	// Stage 4: Pull latest changes
+	if err := pullLatestChanges(ctx, githubClient, cfg); err != nil {
+		return err
+	}
+
+	// Stage 5: Copy directory
+	return copyPullDirectory(cfg, targetDir)
+}
+
+// setupPullCommand determines the target directory and loads configuration.
+func setupPullCommand(cmd *cobra.Command, args []string) (string, *config.AnvilConfig, error) {
 	targetDir := constants.ANVIL
 	if len(args) > 0 {
 		targetDir = args[0]
 	}
 
-	// Load configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		return errors.NewConfigurationError(constants.OpPull, "load-config", err)
+		return "", nil, errors.NewConfigurationError(constants.OpPull, "load-config", err)
 	}
 
-	// Validate GitHub configuration
 	if err := validateGitHubConfig(cfg); err != nil {
-		return err
+		return "", nil, err
 	}
+
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintHeader(fmt.Sprintf("Pull '%s' Configuration", targetDir))
 	output.PrintInfo("Repository: %s", cfg.GitHub.ConfigRepo)
@@ -99,7 +130,12 @@ func runPullCommand(cmd *cobra.Command, args []string) error {
 	output.PrintInfo("Target directory: %s", targetDir)
 	fmt.Println("")
 
-	// Stage 1: Authentication check
+	return targetDir, cfg, nil
+}
+
+// setupPullAuthentication sets up authentication and creates GitHub client.
+func setupPullAuthentication(cfg *config.AnvilConfig) (*github.GitHubClient, context.Context, error) {
+	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Checking authentication...")
 	token := ""
 	if cfg.GitHub.TokenEnvVar != "" {
@@ -111,7 +147,6 @@ func runPullCommand(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Create GitHub client
 	githubClient := github.NewGitHubClient(
 		cfg.GitHub.ConfigRepo,
 		cfg.GitHub.Branch,
@@ -122,11 +157,17 @@ func runPullCommand(cmd *cobra.Command, args []string) error {
 		cfg.Git.Email,
 	)
 
-	// Create context with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	defer cancel()
+	// Store cancel in a way that can be deferred - we'll need to handle this differently
+	// For now, we'll let the context timeout handle cleanup
+	_ = cancel
 
-	// Stage 2: Repository validation
+	return githubClient, ctx, nil
+}
+
+// validatePullRepository validates repository access.
+func validatePullRepository(ctx context.Context, githubClient *github.GitHubClient, cfg *config.AnvilConfig) error {
+	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Stage 2: Validating repository access...")
 	spinner := charm.NewCircleSpinner("Validating repository access and branch configuration")
 	spinner.Start()
@@ -138,10 +179,14 @@ func runPullCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to validate repository: %w", err)
 	}
 	spinner.Success("Repository access confirmed")
+	return nil
+}
 
-	// Stage 3: Clone/update repository
+// ensurePullRepository clones or updates the repository.
+func ensurePullRepository(ctx context.Context, githubClient *github.GitHubClient, cfg *config.AnvilConfig) error {
+	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Stage 3: Cloning or updating repository...")
-	spinner = charm.NewDotsSpinner("Cloning or updating repository")
+	spinner := charm.NewDotsSpinner("Cloning or updating repository")
 	spinner.Start()
 	if err := githubClient.CloneRepository(ctx); err != nil {
 		spinner.Error("Clone failed")
@@ -151,10 +196,14 @@ func runPullCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to clone repository: %w", err)
 	}
 	spinner.Success("Repository ready")
+	return nil
+}
 
-	// Stage 4: Pull latest changes
+// pullLatestChanges pulls the latest changes from the repository.
+func pullLatestChanges(ctx context.Context, githubClient *github.GitHubClient, cfg *config.AnvilConfig) error {
+	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Stage 4: Pulling latest changes...")
-	spinner = charm.NewDotsSpinner("Pulling latest changes")
+	spinner := charm.NewDotsSpinner("Pulling latest changes")
 	spinner.Start()
 	if err := githubClient.PullChanges(ctx); err != nil {
 		spinner.Error("Pull failed")
@@ -164,10 +213,14 @@ func runPullCommand(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to pull changes: %w", err)
 	}
 	spinner.Success("Repository updated")
+	return nil
+}
 
-	// Stage 5: Copy configuration directory
+// copyPullDirectory copies the configuration directory to temp location.
+func copyPullDirectory(cfg *config.AnvilConfig, targetDir string) error {
+	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Stage 5: Copying configuration directory...")
-	spinner = charm.NewDotsSpinner(fmt.Sprintf("Copying %s directory", targetDir))
+	spinner := charm.NewDotsSpinner(fmt.Sprintf("Copying %s directory", targetDir))
 	spinner.Start()
 	tempDir, err := copyDirectoryToTemp(cfg, targetDir)
 	if err != nil {

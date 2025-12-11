@@ -242,10 +242,7 @@ func handleUserConfirmation(output palantir.OutputHandler, appName string, githu
 	output.PrintStage("Requesting user confirmation...")
 	if !output.Confirm(fmt.Sprintf("Do you want to push your %s configurations to the repository?", appName)) {
 		output.PrintInfo("Push cancelled by user")
-		// Clean up any staged changes from the diff preview
-		if cleanupErr := githubClient.CleanupStagedChanges(ctx); cleanupErr != nil {
-			output.PrintWarning("Failed to cleanup staged changes: %v", cleanupErr)
-		}
+		cleanupOnError(ctx, githubClient, nil)
 		return false
 	}
 	return true

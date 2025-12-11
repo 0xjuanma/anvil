@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package update provides functionality for updating Anvil to the latest
+// version by downloading and executing the installation script from GitHub.
 package update
 
 import (
@@ -27,20 +29,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// UpdateCmd represents the update command
+// UpdateCmd represents the update command.
 var UpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Update Anvil to the latest version",
 	Long:  constants.UPDATE_COMMAND_LONG_DESCRIPTION,
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := runUpdateCommand(cmd); err != nil {
-			palantir.GetGlobalOutputHandler().PrintError("Update failed: %v", err)
-			return
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runUpdateCommand(cmd)
 	},
 }
 
-// runUpdateCommand executes the update process
+// runUpdateCommand executes the update process.
 func runUpdateCommand(cmd *cobra.Command) error {
 	o := palantir.GetGlobalOutputHandler()
 
@@ -70,15 +69,15 @@ func runUpdateCommand(cmd *cobra.Command) error {
 	return nil
 }
 
-// updateAnvil updates Anvil to the latest version
-// it uses the curl command to download the latest installation script from GitHub releases
+// updateAnvil updates Anvil to the latest version by downloading and
+// executing the installation script from GitHub releases with fallback to main branch.
 func updateAnvil(ctx context.Context, dryRun bool) (*system.CommandResult, error) {
 	o := palantir.GetGlobalOutputHandler()
 
 	if dryRun {
 		o.PrintInfo("Dry run mode - would update Anvil to the latest version")
 		o.PrintInfo("Command that would be executed:")
-		o.PrintInfo("curl -sSL https://github.com/0xjuanma/anvil/releases/latest/download/install.sh | bash")
+		o.PrintInfo("curl -sSL %s | bash", constants.UpdateReleaseScriptURL)
 		return nil, nil
 	}
 
@@ -93,16 +92,16 @@ func updateAnvil(ctx context.Context, dryRun bool) (*system.CommandResult, error
 
 	// Try downloading from releases first, fallback to main branch if that fails
 	// This handles cases where the install.sh in releases hasn't been updated yet
-	updateScript := `set -e
-		if ! curl -sfSL https://github.com/0xjuanma/anvil/releases/latest/download/install.sh -o /tmp/anvil-install.sh 2>/dev/null; then
+	updateScript := fmt.Sprintf(`set -e
+		if ! curl -sfSL %s -o /tmp/anvil-install.sh 2>/dev/null; then
 			echo "⚠️  Install script not found in releases, trying main branch..."
-			curl -sfSL https://raw.githubusercontent.com/0xjuanma/anvil/master/install.sh -o /tmp/anvil-install.sh || {
+			curl -sfSL %s -o /tmp/anvil-install.sh || {
 				echo "❌ Failed to download install script"
 				exit 1
 			}
 		fi
 		bash /tmp/anvil-install.sh
-		rm -f /tmp/anvil-install.sh`
+		rm -f /tmp/anvil-install.sh`, constants.UpdateReleaseScriptURL, constants.UpdateMainScriptURL)
 
 	// Execute the update command using the existing system package
 	result, err := system.RunCommandWithTimeout(

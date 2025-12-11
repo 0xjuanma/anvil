@@ -274,7 +274,7 @@ func (ci *ConcurrentInstaller) installSingleTool(ctx context.Context, tool strin
 		spinner := charm.NewLineSpinner(fmt.Sprintf("Worker %d: Installing Oh My Zsh", workerID))
 		spinner.Start()
 		ohMyZshScript := `sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended`
-		if err := ci.runPostInstallScript(ohMyZshScript); err != nil {
+		if err := ci.printPostInstallInstructions(ohMyZshScript); err != nil {
 			spinner.Warning(fmt.Sprintf("Worker %d: Oh My Zsh setup skipped", workerID))
 		} else {
 			spinner.Success(fmt.Sprintf("Worker %d: Oh My Zsh installed", workerID))
@@ -291,9 +291,8 @@ func (ci *ConcurrentInstaller) installSingleTool(ctx context.Context, tool strin
 	return nil
 }
 
-// runPostInstallScript runs a post-install script for a tool
-func (ci *ConcurrentInstaller) runPostInstallScript(script string) error {
-	// For now, just provide instructions to the user
+// printPostInstallInstructions prints post-install instructions for a tool
+func (ci *ConcurrentInstaller) printPostInstallInstructions(script string) error {
 	ci.output.PrintInfo("To complete setup, run:")
 	ci.output.PrintInfo("  %s", script)
 	return nil

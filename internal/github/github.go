@@ -201,12 +201,6 @@ func (gc *GitHubClient) PushChanges(ctx context.Context, commitMessage string) e
 	return nil
 }
 
-// CreateRepository creates a new GitHub repository if it doesn't exist
-func (gc *GitHubClient) CreateRepository(ctx context.Context, repoName, description string) error {
-	// This would require GitHub API integration
-	// For now, we'll assume the repository exists or provide instructions
-	return fmt.Errorf("repository creation not implemented - please create the repository manually on GitHub: %s", gc.RepoURL)
-}
 
 // ValidateRepository checks if the repository is accessible and the specified branch exists
 func (gc *GitHubClient) ValidateRepository(ctx context.Context) error {

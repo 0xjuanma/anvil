@@ -96,25 +96,14 @@ func pushAppConfig(appName string) error {
 		showNewAppInfo(appName, configPath)
 	}
 
-	// Stage 3: 🚨 SECURITY WARNING
-	showSecurityWarning(anvilConfig.GitHub.ConfigRepo)
-
-	// Stage 4: Authentication setup
-	githubClient, err := setupAuthentication(anvilConfig)
-	if err != nil {
-		return err
-	}
-
-	// Stage 5: Prepare and show diff
+	// Common push workflow stages
 	ctx := context.Background()
-	diffSummary, err := prepareDiffPreview(githubClient, appName, configPath, ctx)
+	githubClient, diffSummary, err := executeCommonPushStages(anvilConfig, appName, configPath, ctx)
 	if err != nil {
 		return err
 	}
-
-	// Stage 6: User confirmation
-	if !handleUserConfirmation(output, appName, githubClient, ctx) {
-		return nil
+	if diffSummary == nil {
+		return nil // User cancelled
 	}
 
 	// Stage 7: Push configuration

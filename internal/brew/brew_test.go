@@ -143,7 +143,7 @@ func TestGetInstalledPackagesWhenNotInstalled(t *testing.T) {
 		t.Skip("Skipping test - Homebrew is installed")
 	}
 
-	packages, err := GetInstalledPackages()
+	packages, err := InstalledPackages()
 	if err == nil {
 		t.Error("Expected error when brew is not installed")
 	}

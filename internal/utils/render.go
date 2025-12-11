@@ -32,24 +32,32 @@ type AppTreeNode struct {
 	Children []*AppTreeNode
 }
 
+// AppData holds all application data for rendering
+type AppData struct {
+	Groups            map[string][]string
+	BuiltInGroupNames []string
+	CustomGroupNames  []string
+	InstalledApps     []string
+}
+
 // RenderListView renders applications in a flat list format
-func RenderListView(groups map[string][]string, builtInGroupNames []string, customGroupNames []string, installedApps []string) string {
+func RenderListView(data AppData) string {
 	var content strings.Builder
 	content.WriteString("\n")
 
 	// Show built-in groups first
 	content.WriteString(ColorSectionHeader("Built-in Groups") + "\n\n")
-	for _, groupName := range builtInGroupNames {
-		if tools, exists := groups[groupName]; exists {
+	for _, groupName := range data.BuiltInGroupNames {
+		if tools, exists := data.Groups[groupName]; exists {
 			content.WriteString(fmt.Sprintf("  %s  %s\n", ColorGroupNameWithIcon(groupName), strings.Join(tools, ", ")))
 		}
 	}
 
 	// Show custom groups
-	if len(customGroupNames) > 0 {
+	if len(data.CustomGroupNames) > 0 {
 		content.WriteString("\n" + ColorSectionHeader("Custom Groups") + "\n\n")
-		for _, groupName := range customGroupNames {
-			content.WriteString(fmt.Sprintf("  %s  %s\n", ColorGroupNameWithIcon(groupName), strings.Join(groups[groupName], ", ")))
+		for _, groupName := range data.CustomGroupNames {
+			content.WriteString(fmt.Sprintf("  %s  %s\n", ColorGroupNameWithIcon(groupName), strings.Join(data.Groups[groupName], ", ")))
 		}
 	} else {
 		content.WriteString(fmt.Sprintf("\n%sNo custom groups defined%s\n", palantir.ColorBold+palantir.ColorYellow, palantir.ColorReset))
@@ -57,9 +65,9 @@ func RenderListView(groups map[string][]string, builtInGroupNames []string, cust
 	}
 
 	// Show individually tracked installed apps
-	if len(installedApps) > 0 {
+	if len(data.InstalledApps) > 0 {
 		content.WriteString("\n" + ColorSectionHeader("Individually Tracked Apps") + "\n\n")
-		for _, app := range installedApps {
+		for _, app := range data.InstalledApps {
 			content.WriteString(fmt.Sprintf("  %s\n", ColorAppName(app)))
 		}
 	}
@@ -69,7 +77,7 @@ func RenderListView(groups map[string][]string, builtInGroupNames []string, cust
 }
 
 // RenderTreeView renders applications in a hierarchical tree format
-func RenderTreeView(groups map[string][]string, builtInGroupNames []string, customGroupNames []string, installedApps []string) string {
+func RenderTreeView(data AppData) string {
 	// Create root node
 	root := &AppTreeNode{
 		Name:     "Applications",
@@ -78,15 +86,15 @@ func RenderTreeView(groups map[string][]string, builtInGroupNames []string, cust
 	}
 
 	// Add built-in groups section
-	if len(builtInGroupNames) > 0 {
+	if len(data.BuiltInGroupNames) > 0 {
 		builtInNode := &AppTreeNode{
 			Name:     "Built-in Groups",
 			IsGroup:  false,
 			Children: []*AppTreeNode{},
 		}
 
-		for _, groupName := range builtInGroupNames {
-			if tools, exists := groups[groupName]; exists {
+		for _, groupName := range data.BuiltInGroupNames {
+			if tools, exists := data.Groups[groupName]; exists {
 				groupNode := &AppTreeNode{
 					Name:    groupName,
 					IsGroup: true,
@@ -102,18 +110,18 @@ func RenderTreeView(groups map[string][]string, builtInGroupNames []string, cust
 	}
 
 	// Add custom groups section
-	if len(customGroupNames) > 0 {
+	if len(data.CustomGroupNames) > 0 {
 		customNode := &AppTreeNode{
 			Name:     "Custom Groups",
 			IsGroup:  false,
 			Children: []*AppTreeNode{},
 		}
 
-		for _, groupName := range customGroupNames {
+		for _, groupName := range data.CustomGroupNames {
 			groupNode := &AppTreeNode{
 				Name:    groupName,
 				IsGroup: true,
-				Apps:    groups[groupName],
+				Apps:    data.Groups[groupName],
 			}
 			customNode.Children = append(customNode.Children, groupNode)
 		}
@@ -122,14 +130,14 @@ func RenderTreeView(groups map[string][]string, builtInGroupNames []string, cust
 	}
 
 	// Add individually tracked apps section
-	if len(installedApps) > 0 {
+	if len(data.InstalledApps) > 0 {
 		individualNode := &AppTreeNode{
 			Name:     "Individually Tracked Apps",
 			IsGroup:  false,
 			Children: []*AppTreeNode{},
 		}
 
-		for _, appName := range installedApps {
+		for _, appName := range data.InstalledApps {
 			appNode := &AppTreeNode{
 				Name:    appName,
 				IsGroup: false,

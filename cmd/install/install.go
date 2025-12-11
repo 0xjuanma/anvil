@@ -74,10 +74,20 @@ var InstallCmd = &cobra.Command{
 			var content string
 			var title = "Available Applications"
 			if treeFlag {
-				content = utils.RenderTreeView(groups, builtInGroupNames, customGroupNames, installedApps)
+				content = utils.RenderTreeView(utils.AppData{
+					Groups:            groups,
+					BuiltInGroupNames: builtInGroupNames,
+					CustomGroupNames:  customGroupNames,
+					InstalledApps:     installedApps,
+				})
 				title = fmt.Sprintf("%s (Tree View)", title)
 			} else {
-				content = utils.RenderListView(groups, builtInGroupNames, customGroupNames, installedApps)
+				content = utils.RenderListView(utils.AppData{
+					Groups:            groups,
+					BuiltInGroupNames: builtInGroupNames,
+					CustomGroupNames:  customGroupNames,
+					InstalledApps:     installedApps,
+				})
 				title = fmt.Sprintf("%s (List View)", title)
 			}
 

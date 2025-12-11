@@ -83,7 +83,12 @@ func showGroupsSection() error {
 	}
 
 	// Use the shared tree view renderer
-	content := utils.RenderTreeView(groups, builtInGroupNames, customGroupNames, installedApps)
+	content := utils.RenderTreeView(utils.AppData{
+		Groups:            groups,
+		BuiltInGroupNames: builtInGroupNames,
+		CustomGroupNames:  customGroupNames,
+		InstalledApps:     installedApps,
+	})
 
 	fmt.Println(charm.RenderBox("Groups", content, "#E0C867", false))
 

@@ -83,10 +83,11 @@ func runPullCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	// Stage 1: Authentication
-	githubClient, ctx, err := setupPullAuthentication(cfg)
+	githubClient, ctx, cancel, err := setupPullAuthentication(cfg)
 	if err != nil {
 		return err
 	}
+	defer cancel()
 
 	// Stage 2: Validate repository
 	if err := validatePullRepository(ctx, githubClient, cfg); err != nil {
@@ -134,7 +135,7 @@ func setupPullCommand(cmd *cobra.Command, args []string) (string, *config.AnvilC
 }
 
 // setupPullAuthentication sets up authentication and creates GitHub client.
-func setupPullAuthentication(cfg *config.AnvilConfig) (*github.GitHubClient, context.Context, error) {
+func setupPullAuthentication(cfg *config.AnvilConfig) (*github.GitHubClient, context.Context, context.CancelFunc, error) {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Checking authentication...")
 	token := ""
@@ -158,11 +159,7 @@ func setupPullAuthentication(cfg *config.AnvilConfig) (*github.GitHubClient, con
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-	// Store cancel in a way that can be deferred - we'll need to handle this differently
-	// For now, we'll let the context timeout handle cleanup
-	_ = cancel
-
-	return githubClient, ctx, nil
+	return githubClient, ctx, cancel, nil
 }
 
 // validatePullRepository validates repository access.

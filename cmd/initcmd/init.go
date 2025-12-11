@@ -14,11 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package initcmd provides initialization functionality for setting up the
+// Anvil CLI environment, including tool validation and configuration generation.
 package initcmd
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/0xjuanma/anvil/internal/config"
@@ -30,20 +31,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// InitCmd represents the init command for Anvil CLI environment setup
+// InitCmd represents the init command for Anvil CLI environment setup.
 var InitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize Anvil CLI environment",
 	Long:  constants.INIT_COMMAND_LONG_DESCRIPTION,
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := runInitCommand(cmd); err != nil {
-			palantir.GetGlobalOutputHandler().PrintError("Initialization failed: %v", err)
-			os.Exit(1)
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runInitCommand(cmd)
 	},
 }
 
-// runInitCommand executes the complete initialization process for Anvil CLI environment
+// runInitCommand executes the complete initialization process for Anvil CLI environment.
 func runInitCommand(cmd *cobra.Command) error {
 	// Display initialization banner
 	fmt.Println(charm.RenderBox("🔨 ANVIL INITIALIZATION", "", "#00D9FF", true))
@@ -155,6 +153,5 @@ func runInitCommand(cmd *cobra.Command) error {
 
 func init() {
 	// Add flags for additional functionality
-	InitCmd.Flags().Bool("skip-tools", false, "Skip tool validation and installation")
 	InitCmd.Flags().Bool("discover", false, "Run the app/package discovery logic")
 }

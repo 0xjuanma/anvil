@@ -74,7 +74,7 @@ func installOnLinux(filePath, appName string) error {
 	case constants.ExtZIP:
 		return installZIP(filePath, appName)
 	default:
-		return fmt.Errorf("unsupported file type: %s (supported: %s, %s, %s, %s, %s, %s, %s)", ext, constants.ExtDEB, constants.ExtRPM, constants.ExtAppImage, constants.ExtZIP, constants.ExtTarGz, constants.ExtTarBz2)
+		return fmt.Errorf("unsupported file type: %s (supported: %s, %s, %s, %s, %s, %s)", ext, constants.ExtDEB, constants.ExtRPM, constants.ExtAppImage, constants.ExtZIP, constants.ExtTarGz, constants.ExtTarBz2)
 	}
 }
 

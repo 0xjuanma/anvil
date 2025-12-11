@@ -59,7 +59,7 @@ anvil update
 | `anvil config sync [app-name]` | Sync your pulled app configurations to your local machine |
 | `anvil clean` | Clean your anvil environment |
 | `anvil update` | Update your anvil installation |
-| `anvil version` | Show the version of anvil |
+| `anvil --version/-v` | Show the version of anvil |
 
 
 ### Try It Out

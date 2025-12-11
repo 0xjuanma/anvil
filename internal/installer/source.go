@@ -181,7 +181,7 @@ func downloadFile(fileURL, appName string) (string, error) {
 		return "", fmt.Errorf("HTTP error %d: %s", resp.StatusCode, resp.Status)
 	}
 
-	homeDir, _ := system.GetHomeDir()
+	homeDir, _ := system.HomeDir()
 	downloadsDir := filepath.Join(homeDir, "Downloads", "anvil-downloads")
 	if err := utils.EnsureDirectory(downloadsDir); err != nil {
 		return "", fmt.Errorf("failed to create downloads directory: %w", err)

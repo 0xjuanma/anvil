@@ -40,7 +40,7 @@ type AnvilConfig struct {
 
 // GetAnvilConfigDirectory returns the path to the anvil config directory
 func GetAnvilConfigDirectory() string {
-	homeDir, _ := system.GetHomeDir()
+	homeDir, _ := system.HomeDir()
 	return filepath.Join(homeDir, constants.ANVIL_CONFIG_DIR)
 }
 
@@ -91,7 +91,7 @@ func LoadSampleConfigWithVersion(version string) (*AnvilConfig, error) {
 	}
 
 	// Set dynamic paths
-	homeDir, _ := system.GetHomeDir()
+	homeDir, _ := system.HomeDir()
 	config.GitHub.LocalPath = filepath.Join(homeDir, constants.ANVIL_CONFIG_DIR, "dotfiles")
 
 	// Populate Git configuration from system, including auto-detecting ssh_key_path

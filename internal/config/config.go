@@ -137,7 +137,7 @@ func PopulateGitConfigFromSystem(gitConfig *GitConfig) error {
 	}
 
 	// Auto-detect SSH key path from common locations
-	homeDir, _ := system.GetHomeDir()
+	homeDir, _ := system.HomeDir()
 	sshDir := filepath.Join(homeDir, ".ssh")
 
 	// Common SSH key names in order of preference
@@ -238,7 +238,7 @@ func CheckEnvironmentConfigurations() []string {
 	}
 
 	// Check SSH keys
-	homeDir, _ := system.GetHomeDir()
+	homeDir, _ := system.HomeDir()
 	sshDir := filepath.Join(homeDir, constants.SSHDir)
 	if _, err := os.Stat(sshDir); os.IsNotExist(err) {
 		warnings = append(warnings, "Set up SSH keys for GitHub: ssh-keygen -t ed25519 -C 'your.email@example.com'")

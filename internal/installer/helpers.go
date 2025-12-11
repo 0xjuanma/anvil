@@ -45,7 +45,7 @@ func runCommandWithSpinner(spinnerMsg, errorMsg string, command string, args ...
 
 // ensureApplicationsDirectory ensures the Applications directory exists and returns its path
 func ensureApplicationsDirectory() (string, error) {
-	homeDir, _ := system.GetHomeDir()
+	homeDir, _ := system.HomeDir()
 	applicationsDir := filepath.Join(homeDir, "Applications")
 	if err := utils.EnsureDirectory(applicationsDir); err != nil {
 		return "", fmt.Errorf("failed to create Applications directory: %w", err)
@@ -55,7 +55,7 @@ func ensureApplicationsDirectory() (string, error) {
 
 // ensureLinuxApplicationsDirectory ensures the Linux applications directory exists and returns its path
 func ensureLinuxApplicationsDirectory(appName string) (string, error) {
-	homeDir, _ := system.GetHomeDir()
+	homeDir, _ := system.HomeDir()
 	destDir := filepath.Join(homeDir, ".local", "share", "applications", appName)
 	if err := utils.EnsureDirectory(filepath.Dir(destDir)); err != nil {
 		return "", fmt.Errorf("failed to create destination directory: %w", err)

@@ -41,7 +41,7 @@ func showWelcomeBanner() {
   anvil config sync [app-name]			 Sync your app configurations to your local machine
   anvil clean							  Clean your anvil environment
   anvil update							 Update your anvil installation
-  anvil version							Show the version of anvil
+  anvil --version/-v					   Show the version of anvil
 `
 	fmt.Println(charm.RenderBox("Quick Start", quickStart, "#00D9FF", false))
 

@@ -27,8 +27,8 @@ const (
 	SpinnerCloningRepository    = "Cloning or updating repository"
 	SpinnerPullingChanges       = "Pulling latest changes"
 	SpinnerSettingUpAuth        = "Setting up authentication..."
-	SpinnerAnalyzingChanges      = "Analyzing changes..."
-	SpinnerLoadingConfig         = "Loading anvil configuration..."
+	SpinnerAnalyzingChanges     = "Analyzing changes..."
+	SpinnerLoadingConfig        = "Loading anvil configuration..."
 )
 
 // Common status messages
@@ -45,9 +45,9 @@ const (
 
 // Common error message templates
 const (
-	ErrConfigNotPulled      = "config not pulled yet"
-	ErrAppConfigNotDefined  = "app config path not defined"
+	ErrConfigNotPulled        = "config not pulled yet"
+	ErrAppConfigNotDefined    = "app config path not defined"
 	ErrAppConfigNotConfigured = "app config path not configured in settings"
-	ErrNoConfigsSection     = "no configs section found in %s"
-	ErrGitHubRepoNotSet     = "GitHub repository not configured. Please set 'github.config_repo' in your %s"
+	ErrNoConfigsSection       = "no configs section found in %s"
+	ErrGitHubRepoNotSet       = "GitHub repository not configured. Please set 'github.config_repo' in your %s"
 )

@@ -28,7 +28,7 @@ import (
 // information when Anvil is run without arguments.
 func showWelcomeBanner() {
 	// Main banner
-	bannerContent := fmt.Sprintf("%s\n🔥 One CLI to rule them all 🔥\n\tversion: %s\n\n", constants.AnvilLogo, version.GetVersion())
+	bannerContent := fmt.Sprintf("%s\n🔥 One CLI to rule them all 🔥\n\tversion: %s\n\n", constants.AnvilLogo, version.Version())
 	fmt.Println(charm.RenderBox("", bannerContent, "#FF6B9D", true))
 
 	quickStart := `
@@ -53,5 +53,5 @@ func showWelcomeBanner() {
 // showVersionInfo displays the version information with branding when
 // the --version flag is used.
 func showVersionInfo() {
-	fmt.Println(charm.RenderBox("ANVIL CLI", version.GetVersion(), "#FF6B9D", true))
+	fmt.Println(charm.RenderBox("ANVIL CLI", version.Version(), "#FF6B9D", true))
 }

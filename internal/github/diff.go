@@ -36,8 +36,8 @@ type DiffSummary struct {
 	TotalFiles    int    // Simple count of changed files
 }
 
-// GetDiffPreview generates diff preview for both anvil and app configs before pushing
-func (gc *GitHubClient) GetDiffPreview(ctx context.Context, sourcePath, targetPath string) (*DiffSummary, error) {
+// DiffPreview generates diff preview for both anvil and app configs before pushing
+func (gc *GitHubClient) DiffPreview(ctx context.Context, sourcePath, targetPath string) (*DiffSummary, error) {
 	// First, ensure repository is ready
 	if err := gc.ensureRepositoryReady(ctx); err != nil {
 		return nil, err

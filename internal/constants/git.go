@@ -14,19 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package version provides version management for the Anvil CLI.
-// The version is typically set at build time and can be retrieved at runtime.
-package version
+package constants
 
-// appVersion holds the application version set at build time
-var appVersion = "dev"
+// Git environment variables for non-interactive mode
+const (
+	GitTerminalPrompt = "GIT_TERMINAL_PROMPT=0"
+	GitAskPass        = "GIT_ASKPASS=/bin/false"
+	SSHAskPass        = "SSH_ASKPASS=/bin/false"
+	GitSSHCommand     = "GIT_SSH_COMMAND=ssh -o BatchMode=yes -o StrictHostKeyChecking=no"
+)
 
-// SetVersion sets the application version
-func SetVersion(v string) {
-	appVersion = v
-}
-
-// Version returns the current application version
-func Version() string {
-	return appVersion
+// GitNonInteractiveEnvVars returns environment variables for non-interactive git operations
+func GitNonInteractiveEnvVars() []string {
+	return []string{
+		GitTerminalPrompt,
+		GitAskPass,
+		SSHAskPass,
+		GitSSHCommand,
+	}
 }

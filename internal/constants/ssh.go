@@ -14,19 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package version provides version management for the Anvil CLI.
-// The version is typically set at build time and can be retrieved at runtime.
-package version
+package constants
 
-// appVersion holds the application version set at build time
-var appVersion = "dev"
-
-// SetVersion sets the application version
-func SetVersion(v string) {
-	appVersion = v
+// Common SSH key names in order of preference for auto-detection
+var CommonSSHKeyNames = []string{
+	"id_ed25519",
+	"id_ed25519_personal",
+	"id_rsa",
+	"id_rsa_personal",
+	"id_ecdsa",
 }
 
-// Version returns the current application version
-func Version() string {
-	return appVersion
+// DefaultSSHKeyName is the default SSH key name used when no keys are found
+const DefaultSSHKeyName = "id_ed25519"
+
+// CommonSSHKeyFiles lists common SSH key file names for validation
+var CommonSSHKeyFiles = []string{
+	"id_rsa",
+	"id_ed25519",
+	"id_ecdsa",
 }

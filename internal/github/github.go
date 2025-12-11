@@ -23,7 +23,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/0xjuanma/anvil/internal/constants"
 	"github.com/0xjuanma/anvil/internal/errors"
@@ -42,16 +41,27 @@ type GitHubClient struct {
 	Email      string
 }
 
-// NewGitHubClient creates a new GitHub client
-func NewGitHubClient(repoURL, branch, localPath, token, sshKeyPath, username, email string) *GitHubClient {
+// GitHubClientOptions holds options for creating a GitHubClient
+type GitHubClientOptions struct {
+	RepoURL    string
+	Branch     string
+	LocalPath  string
+	Token      string
+	SSHKeyPath string
+	Username   string
+	Email      string
+}
+
+// NewGitHubClient creates a new GitHub client with the provided options
+func NewGitHubClient(opts GitHubClientOptions) *GitHubClient {
 	return &GitHubClient{
-		RepoURL:    repoURL,
-		Branch:     branch,
-		LocalPath:  localPath,
-		Token:      token,
-		SSHKeyPath: sshKeyPath,
-		Username:   username,
-		Email:      email,
+		RepoURL:    opts.RepoURL,
+		Branch:     opts.Branch,
+		LocalPath:  opts.LocalPath,
+		Token:      opts.Token,
+		SSHKeyPath: opts.SSHKeyPath,
+		Username:   opts.Username,
+		Email:      opts.Email,
 	}
 }
 
@@ -191,12 +201,6 @@ func (gc *GitHubClient) PushChanges(ctx context.Context, commitMessage string) e
 	return nil
 }
 
-// CreateRepository creates a new GitHub repository if it doesn't exist
-func (gc *GitHubClient) CreateRepository(ctx context.Context, repoName, description string) error {
-	// This would require GitHub API integration
-	// For now, we'll assume the repository exists or provide instructions
-	return fmt.Errorf("repository creation not implemented - please create the repository manually on GitHub: %s", gc.RepoURL)
-}
 
 // ValidateRepository checks if the repository is accessible and the specified branch exists
 func (gc *GitHubClient) ValidateRepository(ctx context.Context) error {
@@ -222,42 +226,50 @@ func (gc *GitHubClient) ValidateRepository(ctx context.Context) error {
 	return nil
 }
 
-// getCloneURL returns the appropriate clone URL based on available authentication
-func (gc *GitHubClient) getCloneURL() string {
-	if gc.Token != "" {
+// BuildAuthenticatedURL creates an authenticated Git URL from repository URL, token, and SSH key path.
+// This is a shared function used by both GitHubClient and validators to avoid duplication.
+func BuildAuthenticatedURL(repoURL, token, sshKeyPath string) string {
+	if token != "" {
 		// Use HTTPS with token
-		if strings.HasPrefix(gc.RepoURL, "https://") {
-			return strings.Replace(gc.RepoURL, "https://", fmt.Sprintf("https://%s@", gc.Token), 1)
+		if strings.HasPrefix(repoURL, "https://") {
+			return strings.Replace(repoURL, "https://", fmt.Sprintf("https://%s@", token), 1)
 		}
 		// Convert repo format like "username/repo" to HTTPS with token
-		if !strings.Contains(gc.RepoURL, "://") {
-			return fmt.Sprintf("https://%s@github.com/%s.git", gc.Token, gc.RepoURL)
+		if !strings.Contains(repoURL, "://") {
+			return fmt.Sprintf("https://%s@github.com/%s.git", token, repoURL)
 		}
 	}
 
 	// Use SSH if available
-	if gc.SSHKeyPath != "" {
-		if _, err := os.Stat(gc.SSHKeyPath); err == nil {
+	if sshKeyPath != "" {
+		if _, err := os.Stat(sshKeyPath); err == nil {
 			// Convert to SSH format
-			if strings.HasPrefix(gc.RepoURL, "https://github.com/") {
-				repoPath := strings.TrimPrefix(gc.RepoURL, "https://github.com/")
+			if strings.HasPrefix(repoURL, "https://github.com/") {
+				repoPath := strings.TrimPrefix(repoURL, "https://github.com/")
 				repoPath = strings.TrimSuffix(repoPath, ".git")
 				return fmt.Sprintf("git@github.com:%s.git", repoPath)
 			}
-			if !strings.Contains(gc.RepoURL, "://") {
-				return fmt.Sprintf("git@github.com:%s.git", gc.RepoURL)
+			if !strings.Contains(repoURL, "://") {
+				return fmt.Sprintf("git@github.com:%s.git", repoURL)
 			}
 		}
 	}
 
 	// Default to HTTPS
-	if !strings.Contains(gc.RepoURL, "://") {
-		return fmt.Sprintf("https://github.com/%s.git", gc.RepoURL)
+	if !strings.Contains(repoURL, "://") {
+		return fmt.Sprintf("https://github.com/%s.git", repoURL)
 	}
-	return gc.RepoURL
+	return repoURL
 }
 
-// configureGitUser configures git user for the repository
+// getCloneURL returns the appropriate clone URL based on available authentication.
+// Uses BuildAuthenticatedURL with the client's configuration.
+func (gc *GitHubClient) getCloneURL() string {
+	return BuildAuthenticatedURL(gc.RepoURL, gc.Token, gc.SSHKeyPath)
+}
+
+// configureGitUser configures git user for the repository.
+// Sets user.name and user.email if provided in the client configuration.
 func (gc *GitHubClient) configureGitUser(ctx context.Context) error {
 	if gc.Username != "" {
 		if _, err := system.RunCommandWithTimeout(ctx, constants.GitCommand, "config", "user.name", gc.Username); err != nil {
@@ -274,8 +286,8 @@ func (gc *GitHubClient) configureGitUser(ctx context.Context) error {
 	return nil
 }
 
-// GetRepositoryStatus returns the current status of the local repository
-func (gc *GitHubClient) GetRepositoryStatus(ctx context.Context) (string, error) {
+// RepositoryStatus returns the current status of the local repository
+func (gc *GitHubClient) RepositoryStatus(ctx context.Context) (string, error) {
 	originalDir, err := os.Getwd()
 	if err != nil {
 		return "", errors.NewFileSystemError(constants.OpConfig, "getwd", err)
@@ -294,7 +306,8 @@ func (gc *GitHubClient) GetRepositoryStatus(ctx context.Context) (string, error)
 	return result.Output, nil
 }
 
-// isValidGitRepository checks if the local path contains a valid git repository
+// isValidGitRepository checks if the local path contains a valid git repository.
+// Verifies .git directory exists and git commands work in that directory.
 func (gc *GitHubClient) isValidGitRepository() bool {
 	// Check if directory exists
 	if _, err := os.Stat(gc.LocalPath); os.IsNotExist(err) {
@@ -364,7 +377,7 @@ Example settings.yaml section:
 
 // getAvailableBranches attempts to list available branches from the remote repository
 func (gc *GitHubClient) getAvailableBranches() string {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.GitBranchTimeout)
 	defer cancel()
 
 	result, err := system.RunCommandWithTimeout(ctx, constants.GitCommand, "ls-remote", "--heads", gc.getCloneURL())

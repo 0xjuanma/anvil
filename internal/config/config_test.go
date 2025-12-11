@@ -170,7 +170,7 @@ func TestGetInstalledApps(t *testing.T) {
 	}
 
 	// Test getting installed apps
-	installedApps, err := GetInstalledApps()
+	installedApps, err := InstalledApps()
 	if err != nil {
 		t.Fatalf("Failed to get installed apps: %v", err)
 	}
@@ -270,20 +270,20 @@ func TestHelperFunctions(t *testing.T) {
 	_, cleanup := setupTestConfig(t)
 	defer cleanup()
 
-	// Test GetAnvilConfigDirectory
-	configDir := GetAnvilConfigDirectory()
+	// Test AnvilConfigDirectory
+	configDir := AnvilConfigDirectory()
 	if configDir == "" {
-		t.Error("Expected GetAnvilConfigDirectory to return a non-empty string")
+		t.Error("Expected AnvilConfigDirectory to return a non-empty string")
 	}
 
-	// Test GetAnvilConfigPath
-	configPath := GetAnvilConfigPath()
+	// Test AnvilConfigPath
+	configPath := AnvilConfigPath()
 	if configPath == "" {
-		t.Error("Expected GetAnvilConfigPath to return a non-empty string")
+		t.Error("Expected AnvilConfigPath to return a non-empty string")
 	}
 
-	// Test GetBuiltInGroups
-	builtInGroups := GetBuiltInGroups()
+	// Test BuiltInGroups
+	builtInGroups := BuiltInGroups()
 	expectedGroups := []string{"dev", "essentials"}
 	if len(builtInGroups) != len(expectedGroups) {
 		t.Errorf("Expected %d built-in groups, got %d", len(expectedGroups), len(builtInGroups))
@@ -326,8 +326,8 @@ func TestAppConfigFunctions(t *testing.T) {
 		t.Fatalf("Failed to set app config path: %v", err)
 	}
 
-	// Test GetConfiguredApps
-	apps, err := GetConfiguredApps()
+	// Test ConfiguredApps
+	apps, err := ConfiguredApps()
 	if err != nil {
 		t.Fatalf("Failed to get configured apps: %v", err)
 	}
@@ -338,8 +338,8 @@ func TestAppConfigFunctions(t *testing.T) {
 		t.Errorf("Expected app '%s', got '%s'", appName, apps[0])
 	}
 
-	// Test GetAppConfigPath
-	retrievedPath, found, err := GetAppConfigPath(appName)
+	// Test AppConfigPath
+	retrievedPath, found, err := AppConfigPath(appName)
 	if err != nil {
 		t.Fatalf("Failed to get app config path: %v", err)
 	}
@@ -365,7 +365,7 @@ func TestGroupManagementFunctions(t *testing.T) {
 	}
 
 	// Verify the group was added
-	groupTools, err := GetGroupTools(groupName)
+	groupTools, err := GroupTools(groupName)
 	if err != nil {
 		t.Fatalf("Failed to get group tools: %v", err)
 	}
@@ -381,7 +381,7 @@ func TestGroupManagementFunctions(t *testing.T) {
 	}
 
 	// Verify the group was updated
-	updatedTools, err := GetGroupTools(groupName)
+	updatedTools, err := GroupTools(groupName)
 	if err != nil {
 		t.Fatalf("Failed to get updated group tools: %v", err)
 	}
@@ -389,8 +389,8 @@ func TestGroupManagementFunctions(t *testing.T) {
 		t.Errorf("Expected %d tools in updated group, got %d", len(newTools), len(updatedTools))
 	}
 
-	// Test GetAvailableGroups
-	groups, err := GetAvailableGroups()
+	// Test AvailableGroups
+	groups, err := AvailableGroups()
 	if err != nil {
 		t.Fatalf("Failed to get available groups: %v", err)
 	}

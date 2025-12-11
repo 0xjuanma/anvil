@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package tools provides tool validation and management for the Anvil CLI.
+// It handles required tool checking, installation validation, and tool status reporting.
 package tools
 
 import (
@@ -34,9 +36,9 @@ type Tool struct {
 	Description string
 }
 
-// GetRequiredTools returns the list of required tools for anvil on macOS
+// RequiredTools returns the list of required tools for anvil on macOS
 // Note: Homebrew is handled separately as a prerequisite in ValidateAndInstallTools()
-func GetRequiredTools() []Tool {
+func RequiredTools() []Tool {
 	return []Tool{
 		{
 			Name:        "Git",
@@ -64,7 +66,7 @@ func ValidateAndInstallTools() error {
 	}
 
 	// Phase 2: Validate and install other required tools (using Homebrew when needed)
-	requiredTools := GetRequiredTools()
+	requiredTools := RequiredTools()
 	for _, tool := range requiredTools {
 		if err := validateTool(tool); err != nil {
 			return fmt.Errorf("failed to validate required tool %s: %w", tool.Name, err)
@@ -111,9 +113,9 @@ func validateTool(tool Tool) error {
 	return nil
 }
 
-// GetToolInfo returns information about a specific tool
-func GetToolInfo(toolName string) (*Tool, error) {
-	allTools := GetRequiredTools()
+// ToolInfo returns information about a specific tool
+func ToolInfo(toolName string) (*Tool, error) {
+	allTools := RequiredTools()
 
 	for _, tool := range allTools {
 		if tool.Name == toolName || tool.Command == toolName {
@@ -133,7 +135,7 @@ func CheckToolsStatus() (map[string]bool, error) {
 
 	status := make(map[string]bool)
 
-	allTools := GetRequiredTools()
+	allTools := RequiredTools()
 	for _, tool := range allTools {
 		status[tool.Name] = system.CommandExists(tool.Command)
 	}

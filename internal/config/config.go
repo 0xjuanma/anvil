@@ -67,7 +67,8 @@ type AnvilTools struct {
 	InstalledApps []string `yaml:"installed_apps"` // Tracks individually installed applications
 }
 
-// getCachedConfig returns the cached configuration or loads it if not cached
+// getCachedConfig returns the cached configuration or loads it if not cached.
+// Uses double-checked locking for thread-safe caching.
 func getCachedConfig() (*AnvilConfig, error) {
 	configCacheMutex.RLock()
 	if configCache != nil {
@@ -89,7 +90,8 @@ func getCachedConfig() (*AnvilConfig, error) {
 	return configCache, err
 }
 
-// withConfig executes a function with the cached config, handling common error patterns
+// withConfig executes a function with the cached config, handling common error patterns.
+// Returns an error if config loading fails or if the function returns an error.
 func withConfig(fn func(*AnvilConfig) error) error {
 	config, err := getCachedConfig()
 	if err != nil {
@@ -98,7 +100,8 @@ func withConfig(fn func(*AnvilConfig) error) error {
 	return fn(config)
 }
 
-// withConfigAndSave executes a function with the cached config and saves it
+// withConfigAndSave executes a function with the cached config and saves it.
+// Automatically saves the configuration after the function executes successfully.
 func withConfigAndSave(fn func(*AnvilConfig) error) error {
 	config, err := getCachedConfig()
 	if err != nil {
@@ -110,7 +113,8 @@ func withConfigAndSave(fn func(*AnvilConfig) error) error {
 	return SaveConfig(config)
 }
 
-// ensureMap initializes a map if it's nil
+// ensureMap initializes a map if it's nil.
+// Supports map[string][]string and map[string]string types.
 func ensureMap(m interface{}) {
 	switch v := m.(type) {
 	case *map[string][]string:
@@ -137,20 +141,11 @@ func PopulateGitConfigFromSystem(gitConfig *GitConfig) error {
 	}
 
 	// Auto-detect SSH key path from common locations
-	homeDir, _ := system.GetHomeDir()
+	homeDir, _ := system.HomeDir()
 	sshDir := filepath.Join(homeDir, ".ssh")
 
-	// Common SSH key names in order of preference
-	commonKeyNames := []string{
-		"id_ed25519",
-		"id_ed25519_personal",
-		"id_rsa",
-		"id_rsa_personal",
-		"id_ecdsa",
-	}
-
 	// Find the first existing SSH key
-	for _, keyName := range commonKeyNames {
+	for _, keyName := range constants.CommonSSHKeyNames {
 		keyPath := filepath.Join(sshDir, keyName)
 		if _, err := os.Stat(keyPath); err == nil {
 			gitConfig.SSHKeyPath = keyPath
@@ -160,7 +155,7 @@ func PopulateGitConfigFromSystem(gitConfig *GitConfig) error {
 
 	// If no common keys found, use the default path (will be created if needed)
 	if gitConfig.SSHKeyPath == "" {
-		gitConfig.SSHKeyPath = filepath.Join(sshDir, "id_ed25519")
+		gitConfig.SSHKeyPath = filepath.Join(sshDir, constants.DefaultSSHKeyName)
 	}
 
 	return nil
@@ -180,7 +175,7 @@ func LoadSampleConfig() (*AnvilConfig, error) {
 
 // CreateDirectories creates necessary directories for anvil
 func CreateDirectories() error {
-	configDir := GetAnvilConfigDirectory()
+	configDir := AnvilConfigDirectory()
 
 	// Only create the main config directory
 	if err := utils.EnsureDirectory(configDir); err != nil {
@@ -192,12 +187,12 @@ func CreateDirectories() error {
 
 // GenerateDefaultSettings generates the default settings.yaml file
 func GenerateDefaultSettings() error {
-	return GenerateDefaultSettingsWithVersion(version.GetVersion())
+	return GenerateDefaultSettingsWithVersion(version.Version())
 }
 
 // GenerateDefaultSettingsWithVersion generates the default settings.yaml file with a specific version
 func GenerateDefaultSettingsWithVersion(version string) error {
-	configPath := GetAnvilConfigPath()
+	configPath := AnvilConfigPath()
 
 	// Check if settings.yaml already exists
 	if _, err := os.Stat(configPath); err == nil {
@@ -238,15 +233,14 @@ func CheckEnvironmentConfigurations() []string {
 	}
 
 	// Check SSH keys
-	homeDir, _ := system.GetHomeDir()
+	homeDir, _ := system.HomeDir()
 	sshDir := filepath.Join(homeDir, constants.SSHDir)
 	if _, err := os.Stat(sshDir); os.IsNotExist(err) {
 		warnings = append(warnings, "Set up SSH keys for GitHub: ssh-keygen -t ed25519 -C 'your.email@example.com'")
 	} else {
 		// Check for common SSH key files
-		keyFiles := []string{"id_rsa", "id_ed25519", "id_ecdsa"}
 		hasKey := false
-		for _, keyFile := range keyFiles {
+		for _, keyFile := range constants.CommonSSHKeyFiles {
 			if _, err := os.Stat(filepath.Join(sshDir, keyFile)); err == nil {
 				hasKey = true
 				break
@@ -281,8 +275,8 @@ func AddInstalledApp(appName string) error {
 	})
 }
 
-// GetInstalledApps returns the list of individually installed applications
-func GetInstalledApps() ([]string, error) {
+// InstalledApps returns the list of individually installed applications
+func InstalledApps() ([]string, error) {
 	var apps []string
 	err := withConfig(func(config *AnvilConfig) error {
 		apps = config.Tools.InstalledApps
@@ -350,8 +344,8 @@ func (ls LocationSource) String() string {
 	}
 }
 
-// GetAppConfigPath checks if an app has a configured local path in the configs section
-func GetAppConfigPath(appName string) (string, bool, error) {
+// AppConfigPath checks if an app has a configured local path in the configs section
+func AppConfigPath(appName string) (string, bool, error) {
 	config, err := getCachedConfig()
 	if err != nil {
 		return "", false, fmt.Errorf("failed to load config: %w", err)
@@ -374,9 +368,9 @@ func GetAppConfigPath(appName string) (string, bool, error) {
 	return path, true, nil
 }
 
-// GetTempAppPath checks if an app directory exists in the temp directory (from previous pull)
-func GetTempAppPath(appName string) (string, bool, error) {
-	tempPath := filepath.Join(GetAnvilConfigDirectory(), "temp", appName)
+// TempAppPath checks if an app directory exists in the temp directory (from previous pull)
+func TempAppPath(appName string) (string, bool, error) {
+	tempPath := filepath.Join(AnvilConfigDirectory(), "temp", appName)
 	if _, err := os.Stat(tempPath); os.IsNotExist(err) {
 		return "", false, nil
 	}
@@ -387,14 +381,14 @@ func GetTempAppPath(appName string) (string, bool, error) {
 // ResolveAppLocation finds the config location for an app following the priority order
 func ResolveAppLocation(appName string) (string, LocationSource, error) {
 	// Priority 1: Check configs section in settings.yaml
-	if path, found, err := GetAppConfigPath(appName); err != nil {
+	if path, found, err := AppConfigPath(appName); err != nil {
 		return "", LocationConfigs, err
 	} else if found {
 		return path, LocationConfigs, nil
 	}
 
 	// Priority 2: Check temp directory (pulled configs)
-	if path, found, err := GetTempAppPath(appName); err != nil {
+	if path, found, err := TempAppPath(appName); err != nil {
 		return "", LocationTemp, err
 	} else if found {
 		return path, LocationTemp, nil
@@ -413,8 +407,8 @@ func SetAppConfigPath(appName, configPath string) error {
 	})
 }
 
-// GetConfiguredApps returns a list of all apps that have configured paths
-func GetConfiguredApps() ([]string, error) {
+// ConfiguredApps returns a list of all apps that have configured paths
+func ConfiguredApps() ([]string, error) {
 	var apps []string
 	err := withConfig(func(config *AnvilConfig) error {
 		for appName := range config.Configs {

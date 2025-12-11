@@ -129,7 +129,7 @@ func pushAnvilConfig() error {
 	}
 
 	// Get settings file path
-	settingsPath := config.GetAnvilConfigPath()
+	settingsPath := config.AnvilConfigPath()
 
 	output.PrintStage("Preparing to push anvil configuration...")
 	output.PrintInfo("Repository: %s", anvilConfig.GitHub.ConfigRepo)

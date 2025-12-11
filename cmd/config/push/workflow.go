@@ -67,7 +67,7 @@ func prepareDiffPreview(githubClient *github.GitHubClient, appName, configPath s
 	// Add diff output before confirmation
 	output.PrintStage(constants.SpinnerAnalyzingChanges)
 	targetPath := fmt.Sprintf("%s/", appName)
-	diffSummary, err := githubClient.GetDiffPreview(ctx, configPath, targetPath)
+	diffSummary, err := githubClient.DiffPreview(ctx, configPath, targetPath)
 	if err != nil {
 		output.PrintWarning("Unable to generate diff preview: %v", err)
 		return nil, nil
@@ -133,7 +133,7 @@ func executeCommonPushStagesForAnvil(anvilConfig *config.AnvilConfig, settingsPa
 
 	// Prepare and show diff
 	output.PrintStage(constants.SpinnerAnalyzingChanges)
-	diffSummary, err := githubClient.GetDiffPreview(ctx, settingsPath, remotePath)
+		diffSummary, err := githubClient.DiffPreview(ctx, settingsPath, remotePath)
 	if err != nil {
 		output.PrintWarning("Unable to generate diff preview: %v", err)
 	} else {

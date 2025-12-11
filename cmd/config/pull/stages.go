@@ -71,15 +71,15 @@ func setupPullAuthentication(cfg *config.AnvilConfig) (*github.GitHubClient, con
 		}
 	}
 
-	githubClient := github.NewGitHubClient(
-		cfg.GitHub.ConfigRepo,
-		cfg.GitHub.Branch,
-		cfg.GitHub.LocalPath,
-		token,
-		cfg.Git.SSHKeyPath,
-		cfg.Git.Username,
-		cfg.Git.Email,
-	)
+	githubClient := github.NewGitHubClient(github.GitHubClientOptions{
+		RepoURL:    cfg.GitHub.ConfigRepo,
+		Branch:     cfg.GitHub.Branch,
+		LocalPath:  cfg.GitHub.LocalPath,
+		Token:      token,
+		SSHKeyPath: cfg.Git.SSHKeyPath,
+		Username:   cfg.Git.Username,
+		Email:      cfg.Git.Email,
+	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	return githubClient, ctx, cancel, nil

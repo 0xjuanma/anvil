@@ -101,15 +101,15 @@ func setupAuthentication(anvilConfig *config.AnvilConfig) (*github.GitHubClient,
 	}
 
 	// Create GitHub client
-	githubClient := github.NewGitHubClient(
-		anvilConfig.GitHub.ConfigRepo,
-		anvilConfig.GitHub.Branch,
-		anvilConfig.GitHub.LocalPath,
-		token,
-		anvilConfig.Git.SSHKeyPath,
-		anvilConfig.Git.Username,
-		anvilConfig.Git.Email,
-	)
+	githubClient := github.NewGitHubClient(github.GitHubClientOptions{
+		RepoURL:    anvilConfig.GitHub.ConfigRepo,
+		Branch:     anvilConfig.GitHub.Branch,
+		LocalPath:  anvilConfig.GitHub.LocalPath,
+		Token:      token,
+		SSHKeyPath: anvilConfig.Git.SSHKeyPath,
+		Username:   anvilConfig.Git.Username,
+		Email:      anvilConfig.Git.Email,
+	})
 
 	return githubClient, nil
 }

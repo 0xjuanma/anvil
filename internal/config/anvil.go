@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package config provides configuration management for the Anvil CLI.
+// It handles loading, saving, and managing YAML configuration files,
+// as well as app tracking, group management, and path resolution.
 package config
 
 import (
@@ -24,6 +27,7 @@ import (
 
 	"github.com/0xjuanma/anvil/internal/constants"
 	"github.com/0xjuanma/anvil/internal/system"
+	"github.com/0xjuanma/palantir"
 	"gopkg.in/yaml.v2"
 )
 
@@ -38,20 +42,20 @@ type AnvilConfig struct {
 	GitHub  GitHubConfig      `yaml:"github"`
 }
 
-// GetAnvilConfigDirectory returns the path to the anvil config directory
-func GetAnvilConfigDirectory() string {
-	homeDir, _ := system.GetHomeDir()
+// AnvilConfigDirectory returns the path to the anvil config directory
+func AnvilConfigDirectory() string {
+	homeDir, _ := system.HomeDir()
 	return filepath.Join(homeDir, constants.ANVIL_CONFIG_DIR)
 }
 
-// GetAnvilConfigPath returns the path to the anvil config file
-func GetAnvilConfigPath() string {
-	return fmt.Sprintf("%s/%s", GetAnvilConfigDirectory(), constants.ANVIL_CONFIG_FILE)
+// AnvilConfigPath returns the path to the anvil config file
+func AnvilConfigPath() string {
+	return fmt.Sprintf("%s/%s", AnvilConfigDirectory(), constants.ANVIL_CONFIG_FILE)
 }
 
 // LoadConfig loads the anvil configuration from settings.yaml
 func LoadConfig() (*AnvilConfig, error) {
-	configPath := GetAnvilConfigPath()
+	configPath := AnvilConfigPath()
 
 	data, err := os.ReadFile(configPath)
 	if err != nil {
@@ -68,7 +72,7 @@ func LoadConfig() (*AnvilConfig, error) {
 		// Save the corrected configuration back to file
 		if err := SaveConfig(&config); err != nil {
 			// Don't fail loading if we can't save the correction, just warn
-			fmt.Printf("Warning: Could not save corrected GitHub configuration: %v\n", err)
+			palantir.GetGlobalOutputHandler().PrintWarning("Could not save corrected GitHub configuration: %v", err)
 		}
 	}
 
@@ -91,7 +95,7 @@ func LoadSampleConfigWithVersion(version string) (*AnvilConfig, error) {
 	}
 
 	// Set dynamic paths
-	homeDir, _ := system.GetHomeDir()
+	homeDir, _ := system.HomeDir()
 	config.GitHub.LocalPath = filepath.Join(homeDir, constants.ANVIL_CONFIG_DIR, "dotfiles")
 
 	// Populate Git configuration from system, including auto-detecting ssh_key_path
@@ -104,7 +108,7 @@ func LoadSampleConfigWithVersion(version string) (*AnvilConfig, error) {
 
 // SaveConfig saves the anvil configuration to settings.yaml
 func SaveConfig(config *AnvilConfig) error {
-	configPath := GetAnvilConfigPath()
+	configPath := AnvilConfigPath()
 
 	data, err := yaml.Marshal(config)
 	if err != nil {

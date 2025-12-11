@@ -30,7 +30,7 @@ func displayInitCompletion(warnings []string) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader("Initialization Complete!")
 	o.PrintInfo("Anvil has been successfully initialized and is ready to use.")
-	o.PrintInfo("Configuration files have been created in: %s", config.GetAnvilConfigPath())
+	o.PrintInfo("Configuration files have been created in: %s", config.AnvilConfigPath())
 
 	if len(warnings) > 0 {
 		fmt.Println("")
@@ -46,7 +46,7 @@ func displayInitCompletion(warnings []string) error {
 	o.PrintInfo("You can now use:")
 	o.PrintInfo("  • 'anvil install [group]' to install development tool groups")
 	o.PrintInfo("  • 'anvil install [app]' to install any individual application")
-	o.PrintInfo("  • Edit %s/%s to customize your configuration", config.GetAnvilConfigDirectory(), constants.ANVIL_CONFIG_FILE)
+	o.PrintInfo("  • Edit %s/%s to customize your configuration", config.AnvilConfigDirectory(), constants.ANVIL_CONFIG_FILE)
 
 	o.PrintWarning("Configuration Management Setup Required:")
 	o.PrintInfo("  • Edit the 'github.config_repo' field in %s to enable config pull/push", constants.ANVIL_CONFIG_FILE)
@@ -54,8 +54,8 @@ func displayInitCompletion(warnings []string) error {
 	o.PrintInfo("  • Set GITHUB_TOKEN environment variable for authentication")
 	o.PrintInfo("  • Run 'anvil doctor' once added to validate configuration")
 
-	if groups, err := config.GetAvailableGroups(); err == nil {
-		builtInGroups := config.GetBuiltInGroups()
+	if groups, err := config.AvailableGroups(); err == nil {
+		builtInGroups := config.BuiltInGroups()
 		fmt.Println("")
 		o.PrintInfo("Available groups: %s", strings.Join(builtInGroups, ", "))
 		if len(groups) > len(builtInGroups) {

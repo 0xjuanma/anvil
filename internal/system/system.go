@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package system provides system command execution and OS detection utilities.
+// It handles command execution with timeouts, environment setup, and platform detection.
 package system
 
 import (
@@ -23,7 +25,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"time"
+
+	"github.com/0xjuanma/anvil/internal/constants"
 )
 
 // CommandResult represents the result of a command execution
@@ -35,9 +38,9 @@ type CommandResult struct {
 	Success  bool
 }
 
-// RunCommand executes a system command with a default timeout of 5 minutes
+// RunCommand executes a system command with a default timeout
 func RunCommand(command string, args ...string) (*CommandResult, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultCommandTimeout)
 	defer cancel()
 	return RunCommandWithTimeout(ctx, command, args...)
 }
@@ -47,14 +50,8 @@ func RunCommandWithTimeout(ctx context.Context, command string, args ...string) 
 	cmd := exec.CommandContext(ctx, command, args...)
 
 	// For git commands, ensure non-interactive mode to prevent credential prompts
-	if command == "git" {
-		// Set environment variables to prevent credential prompts
-		cmd.Env = append(os.Environ(),
-			"GIT_TERMINAL_PROMPT=0",  // Disable terminal prompts
-			"GIT_ASKPASS=/bin/false", // Disable credential prompts
-			"SSH_ASKPASS=/bin/false", // Disable SSH passphrase prompts
-			"GIT_SSH_COMMAND=ssh -o BatchMode=yes -o StrictHostKeyChecking=no", // Non-interactive SSH
-		)
+	if command == constants.GitCommand {
+		cmd.Env = append(os.Environ(), constants.GitNonInteractiveEnvVars()...)
 	}
 
 	// Capture both stdout and stderr
@@ -82,14 +79,14 @@ func CommandExists(command string) bool {
 	return err == nil
 }
 
-// GetCommandPath returns the full path to a command if it exists
-func GetCommandPath(command string) (string, error) {
+// CommandPath returns the full path to a command if it exists
+func CommandPath(command string) (string, error) {
 	return exec.LookPath(command)
 }
 
 // RunCommandInDirectory executes a command in a specific directory
 func RunCommandInDirectory(dir, command string, args ...string) (*CommandResult, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultCommandTimeout)
 	defer cancel()
 	return RunCommandInDirectoryWithTimeout(ctx, dir, command, args...)
 }
@@ -100,14 +97,8 @@ func RunCommandInDirectoryWithTimeout(ctx context.Context, dir, command string, 
 	cmd.Dir = dir
 
 	// For git commands, ensure non-interactive mode to prevent credential prompts
-	if command == "git" {
-		// Set environment variables to prevent credential prompts
-		cmd.Env = append(os.Environ(),
-			"GIT_TERMINAL_PROMPT=0",  // Disable terminal prompts
-			"GIT_ASKPASS=/bin/false", // Disable credential prompts
-			"SSH_ASKPASS=/bin/false", // Disable SSH passphrase prompts
-			"GIT_SSH_COMMAND=ssh -o BatchMode=yes -o StrictHostKeyChecking=no", // Non-interactive SSH
-		)
+	if command == constants.GitCommand {
+		cmd.Env = append(os.Environ(), constants.GitNonInteractiveEnvVars()...)
 	}
 
 	output, err := cmd.CombinedOutput()
@@ -128,8 +119,8 @@ func RunCommandInDirectoryWithTimeout(ctx context.Context, dir, command string, 
 	return result, nil
 }
 
-// GetEnvironmentVariable gets an environment variable with a default value
-func GetEnvironmentVariable(key, defaultValue string) string {
+// EnvironmentVariable gets an environment variable with a default value
+func EnvironmentVariable(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
 	}

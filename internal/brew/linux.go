@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/0xjuanma/anvil/internal/constants"
 	"github.com/0xjuanma/anvil/internal/system"
 	"github.com/0xjuanma/anvil/internal/terminal/charm"
 	"github.com/0xjuanma/palantir"
@@ -37,7 +38,7 @@ func InstallBrewLinux() error {
 
 	spinner := charm.NewDotsSpinner("Preparing Homebrew installation for Linux")
 	spinner.Start()
-	time.Sleep(200 * time.Millisecond)
+	time.Sleep(constants.SpinnerDelay)
 	spinner.Stop()
 
 	fmt.Print("\r\033[K→ Enter password when prompted: ")

@@ -14,19 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package version provides version management for the Anvil CLI.
-// The version is typically set at build time and can be retrieved at runtime.
-package version
+package constants
 
-// appVersion holds the application version set at build time
-var appVersion = "dev"
+import "time"
 
-// SetVersion sets the application version
-func SetVersion(v string) {
-	appVersion = v
-}
+// Command execution timeouts
+const (
+	DefaultCommandTimeout = 5 * time.Minute
+	GitBranchTimeout     = 30 * time.Second
+	ToolInstallTimeout   = 10 * time.Minute
+)
 
-// Version returns the current application version
-func Version() string {
-	return appVersion
-}
+// UI delays
+const (
+	SpinnerDelay = 200 * time.Millisecond
+)
+
+// Retry configuration
+const (
+	DefaultRetryAttempts = 2
+)

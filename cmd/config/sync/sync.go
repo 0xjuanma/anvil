@@ -74,7 +74,7 @@ func syncAnvilSettings(dryRun bool) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader("Configuration Sync: Anvil settings")
 
-	tempSettingsPath := filepath.Join(config.GetAnvilConfigDirectory(), "temp", constants.ANVIL, constants.ANVIL_CONFIG_FILE)
+	tempSettingsPath := filepath.Join(config.AnvilConfigDirectory(), "temp", constants.ANVIL, constants.ANVIL_CONFIG_FILE)
 	if _, err := os.Stat(tempSettingsPath); os.IsNotExist(err) {
 		o.PrintError("Pulled anvil settings not found\n")
 		o.PrintInfo("💡 No pulled settings found at: %s", tempSettingsPath)
@@ -84,7 +84,7 @@ func syncAnvilSettings(dryRun bool) error {
 		return fmt.Errorf(constants.ErrConfigNotPulled)
 	}
 
-	currentSettingsPath := config.GetAnvilConfigPath()
+	currentSettingsPath := config.AnvilConfigPath()
 
 	o.PrintInfo("Source: %s", tempSettingsPath)
 	o.PrintInfo("Destination: %s\n", currentSettingsPath)
@@ -116,7 +116,7 @@ func syncAppConfig(appName string, dryRun bool) error {
 		return errors.NewConfigurationError(constants.OpSync, "load-config", err)
 	}
 
-	tempAppPath := filepath.Join(config.GetAnvilConfigDirectory(), "temp", appName)
+	tempAppPath := filepath.Join(config.AnvilConfigDirectory(), "temp", appName)
 	if _, err := os.Stat(tempAppPath); os.IsNotExist(err) {
 		output.PrintError("Pulled %s configuration not found\n", appName)
 		output.PrintInfo("💡 No pulled config found at: %s", tempAppPath)

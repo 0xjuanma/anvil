@@ -33,7 +33,7 @@ func validateGitHubConfig(cfg *config.AnvilConfig) error {
 	if cfg.GitHub.ConfigRepo == "" {
 		return errors.NewConfigurationError(constants.OpPull, "validate-config",
 			fmt.Errorf("github.config_repo is not configured. Please edit %s/%s and set github.config_repo to your repository (e.g., 'username/dotfiles')",
-				config.GetAnvilConfigDirectory(), constants.ANVIL_CONFIG_FILE))
+				config.AnvilConfigDirectory(), constants.ANVIL_CONFIG_FILE))
 	}
 
 	if cfg.GitHub.Branch == "" {
@@ -48,7 +48,7 @@ func validateGitHubConfig(cfg *config.AnvilConfig) error {
 Example:
   github:
     branch: "main"  # ← Set this to your repository's default branch`,
-				constants.ANVIL_CONFIG_FILE, config.GetAnvilConfigDirectory(), constants.ANVIL_CONFIG_FILE))
+				constants.ANVIL_CONFIG_FILE, config.AnvilConfigDirectory(), constants.ANVIL_CONFIG_FILE))
 	}
 
 	if cfg.GitHub.LocalPath == "" {
@@ -83,7 +83,7 @@ func copyDirectoryToTemp(cfg *config.AnvilConfig, targetDir string) (string, err
 	}
 
 	// Create temp directory inside anvil config
-	tempBasedir := filepath.Join(config.GetAnvilConfigDirectory(), "temp")
+	tempBasedir := filepath.Join(config.AnvilConfigDirectory(), "temp")
 	if err := utils.EnsureDirectory(tempBasedir); err != nil {
 		return "", errors.NewFileSystemError(constants.OpPull, "create-temp-dir", err)
 	}

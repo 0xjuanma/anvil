@@ -14,19 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package version provides version management for the Anvil CLI.
-// The version is typically set at build time and can be retrieved at runtime.
-package version
+package constants
 
-// appVersion holds the application version set at build time
-var appVersion = "dev"
+// Homebrew installation paths
+const (
+	BrewPathAppleSilicon = "/opt/homebrew/bin/brew"
+	BrewPathIntel        = "/usr/local/bin/brew"
+	BrewPathLinuxStandard = "/home/linuxbrew/.linuxbrew/bin/brew"
+	BrewPathLinuxUser     = "~/.linuxbrew/bin/brew"
+	BrewPathLinuxAlt      = "/opt/homebrew/bin/brew"
+)
 
-// SetVersion sets the application version
-func SetVersion(v string) {
-	appVersion = v
-}
-
-// Version returns the current application version
-func Version() string {
-	return appVersion
-}
+// Download and installation directories
+const (
+	DownloadsDirName     = "Downloads"
+	AnvilDownloadsSubdir = "anvil-downloads"
+)

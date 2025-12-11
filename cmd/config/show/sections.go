@@ -34,7 +34,7 @@ func showAnvilSettingsSection(showGroups, showConfigs, showSources, showGit, sho
 	o := palantir.GetGlobalOutputHandler()
 
 	// Stage 1: Locate settings file
-	configPath := config.GetAnvilConfigPath()
+	configPath := config.AnvilConfigPath()
 
 	// Check settings file
 	err := checkSettingsFileExists(o, configPath)
@@ -77,13 +77,13 @@ func showAnvilSettingsSection(showGroups, showConfigs, showSources, showGit, sho
 
 // showGroupsSection displays the groups section using shared rendering functions.
 func showGroupsSection() error {
-	groups, builtInGroupNames, customGroupNames, installedApps, err := tools.LoadAndPrepareAppData()
+	appData, err := tools.LoadAndPrepareAppData()
 	if err != nil {
 		return err
 	}
 
 	// Use the shared tree view renderer
-	content := utils.RenderTreeView(groups, builtInGroupNames, customGroupNames, installedApps)
+	content := utils.RenderTreeView(appData)
 
 	fmt.Println(charm.RenderBox("Groups", content, "#E0C867", false))
 

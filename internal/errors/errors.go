@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package errors provides structured error types for the Anvil CLI.
+// It defines error categories and helper functions for creating typed errors
+// that can be programmatically inspected using errors.Is and errors.As.
 package errors
 
 import (
@@ -109,7 +112,8 @@ func (e *AnvilError) Is(target error) bool {
 	return false
 }
 
-// NewAnvilErrorWithType creates a new AnvilError with specified type
+// NewAnvilErrorWithType creates a new AnvilError with specified type.
+// Use this for custom error types or when you need full control over error creation.
 func NewAnvilErrorWithType(op, command string, errType ErrorType, err error) *AnvilError {
 	return &AnvilError{
 		Op:      op,
@@ -119,27 +123,32 @@ func NewAnvilErrorWithType(op, command string, errType ErrorType, err error) *An
 	}
 }
 
-// NewValidationError creates a validation error
+// NewValidationError creates a validation error.
+// Use this for input validation failures.
 func NewValidationError(op, command string, err error) *AnvilError {
 	return NewAnvilErrorWithType(op, command, ErrorTypeValidation, err)
 }
 
-// NewConfigurationError creates a configuration error
+// NewConfigurationError creates a configuration error.
+// Use this for configuration file or settings issues.
 func NewConfigurationError(op, command string, err error) *AnvilError {
 	return NewAnvilErrorWithType(op, command, ErrorTypeConfiguration, err)
 }
 
-// NewInstallationError creates an installation error
+// NewInstallationError creates an installation error.
+// Use this for tool or package installation failures.
 func NewInstallationError(op, command string, err error) *AnvilError {
 	return NewAnvilErrorWithType(op, command, ErrorTypeInstallation, err)
 }
 
-// NewNetworkError creates a network error
+// NewNetworkError creates a network error.
+// Use this for network-related failures (API calls, downloads, etc.).
 func NewNetworkError(op, command string, err error) *AnvilError {
 	return NewAnvilErrorWithType(op, command, ErrorTypeNetwork, err)
 }
 
-// NewFileSystemError creates a file system error
+// NewFileSystemError creates a file system error.
+// Use this for file or directory operation failures.
 func NewFileSystemError(op, command string, err error) *AnvilError {
 	return NewAnvilErrorWithType(op, command, ErrorTypeFileSystem, err)
 }

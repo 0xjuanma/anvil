@@ -137,13 +137,13 @@ func TestIsPackageInstalledWhenBrewNotInstalled(t *testing.T) {
 }
 
 func TestGetInstalledPackagesWhenNotInstalled(t *testing.T) {
-	// If brew is not installed, GetInstalledPackages should return an error
+	// If brew is not installed, InstalledPackages should return an error
 	// This test assumes brew is not installed - skip if it is
 	if IsBrewInstalled() {
 		t.Skip("Skipping test - Homebrew is installed")
 	}
 
-	packages, err := GetInstalledPackages()
+	packages, err := InstalledPackages()
 	if err == nil {
 		t.Error("Expected error when brew is not installed")
 	}
@@ -156,13 +156,13 @@ func TestGetInstalledPackagesWhenNotInstalled(t *testing.T) {
 }
 
 func TestGetPackageInfoWhenNotInstalled(t *testing.T) {
-	// If brew is not installed, GetPackageInfo should return an error
+	// If brew is not installed, PackageInfo should return an error
 	// This test assumes brew is not installed - skip if it is
 	if IsBrewInstalled() {
 		t.Skip("Skipping test - Homebrew is installed")
 	}
 
-	pkg, err := GetPackageInfo("git")
+	pkg, err := PackageInfo("git")
 	if err == nil {
 		t.Error("Expected error when brew is not installed")
 	}
@@ -220,8 +220,8 @@ func TestBrewIntegrationWhenInstalled(t *testing.T) {
 		_ = UpdateBrew()
 	})
 
-	t.Run("GetInstalledPackages", func(t *testing.T) {
-		packages, err := GetInstalledPackages()
+	t.Run("InstalledPackages", func(t *testing.T) {
+		packages, err := InstalledPackages()
 		if err != nil {
 			t.Errorf("Expected no error, got: %v", err)
 		}
@@ -235,7 +235,7 @@ func TestBrewIntegrationWhenInstalled(t *testing.T) {
 				t.Error("Package name should not be empty")
 			}
 			if !pkg.Installed {
-				t.Error("All packages from GetInstalledPackages should be marked as installed")
+				t.Error("All packages from InstalledPackages should be marked as installed")
 			}
 		}
 	})
@@ -251,10 +251,10 @@ func TestBrewIntegrationWhenInstalled(t *testing.T) {
 
 	t.Run("GetPackageInfo", func(t *testing.T) {
 		// Test with a common package
-		pkg, err := GetPackageInfo("git")
+		pkg, err := PackageInfo("git")
 		if err != nil {
 			// This might fail if git formula doesn't exist, which is ok
-			t.Logf("GetPackageInfo returned error: %v", err)
+			t.Logf("PackageInfo returned error: %v", err)
 		} else {
 			if pkg == nil {
 				t.Error("Expected package info, got nil")

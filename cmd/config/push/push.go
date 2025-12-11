@@ -31,6 +31,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// PushOperationOptions contains options for performing a push operation.
+type PushOperationOptions struct {
+	GitHubClient *github.GitHubClient
+	AppName      string
+	ConfigPath   string
+	DiffSummary  *github.DiffSummary
+	AnvilConfig  *config.AnvilConfig
+}
+
 var PushCmd = &cobra.Command{
 	Use:   "push [app-name]",
 	Short: "Push configuration files to GitHub repository",
@@ -109,7 +118,14 @@ func pushAppConfig(appName string) error {
 	}
 
 	// Stage 7: Push configuration
-	return performPushOperation(githubClient, appName, configPath, diffSummary, anvilConfig, ctx)
+	opts := PushOperationOptions{
+		GitHubClient: githubClient,
+		AppName:      appName,
+		ConfigPath:   configPath,
+		DiffSummary:  diffSummary,
+		AnvilConfig:  anvilConfig,
+	}
+	return performPushOperation(ctx, opts)
 }
 
 // loadAndValidateConfig loads and validates the anvil configuration.
@@ -357,4 +373,3 @@ func pushAnvilConfig() error {
 
 	return nil
 }
-

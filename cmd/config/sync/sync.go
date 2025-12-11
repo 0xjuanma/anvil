@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package sync provides functionality to sync pulled configuration files
+// to their local destinations with automatic archiving of existing files.
 package sync
 
 import (
@@ -36,15 +38,12 @@ var SyncCmd = &cobra.Command{
 	Short: "Sync pulled configuration files to their local destinations",
 	Long:  constants.SYNC_COMMAND_LONG_DESCRIPTION,
 	Args:  cobra.MaximumNArgs(1), // Accept 0 or 1 argument
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := runSyncCommand(cmd, args); err != nil {
-			palantir.GetGlobalOutputHandler().PrintError("Sync failed: %v", err)
-			return
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runSyncCommand(cmd, args)
 	},
 }
 
-// runSyncCommand executes the configuration sync process
+// runSyncCommand executes the configuration sync process.
 func runSyncCommand(cmd *cobra.Command, args []string) error {
 	// Check for dry-run flag
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
@@ -59,7 +58,7 @@ func runSyncCommand(cmd *cobra.Command, args []string) error {
 	return syncAppConfig(appName, dryRun)
 }
 
-// syncAnvilSettings syncs the main anvil settings.yaml file
+// syncAnvilSettings syncs the main anvil settings.yaml file.
 func syncAnvilSettings(dryRun bool) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader("Configuration Sync: Anvil settings")
@@ -95,7 +94,7 @@ func syncAnvilSettings(dryRun bool) error {
 	)
 }
 
-// syncAppConfig syncs configuration files for a specific app
+// syncAppConfig syncs configuration files for a specific app.
 func syncAppConfig(appName string, dryRun bool) error {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintHeader(fmt.Sprintf("Configuration Sync: %s", appName))
@@ -153,7 +152,7 @@ func syncAppConfig(appName string, dryRun bool) error {
 	)
 }
 
-// performSync executes the core sync operation for any config type
+// performSync executes the core sync operation for any config type.
 func performSync(archivePrefix, sourcePath, destPath, confirmMsg, spinnerMsg, spinnerSuccess, successMsg string) error {
 	output := palantir.GetGlobalOutputHandler()
 

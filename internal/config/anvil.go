@@ -27,6 +27,7 @@ import (
 
 	"github.com/0xjuanma/anvil/internal/constants"
 	"github.com/0xjuanma/anvil/internal/system"
+	"github.com/0xjuanma/palantir"
 	"gopkg.in/yaml.v2"
 )
 
@@ -71,7 +72,7 @@ func LoadConfig() (*AnvilConfig, error) {
 		// Save the corrected configuration back to file
 		if err := SaveConfig(&config); err != nil {
 			// Don't fail loading if we can't save the correction, just warn
-			fmt.Printf("Warning: Could not save corrected GitHub configuration: %v\n", err)
+			palantir.GetGlobalOutputHandler().PrintWarning("Could not save corrected GitHub configuration: %v", err)
 		}
 	}
 

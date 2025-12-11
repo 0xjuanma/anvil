@@ -101,9 +101,10 @@ anvil config sync neovim
 | Guide | Description |
 |-------|-------------|
 | **[Configuration Management](docs/config.md)** | Config sync setup and workflows |
-| **[Install Command](docs/install.md)** | Tool installation guide |
-| **[Import Groups](docs/import.md)** | Import tool groups from files/URLs |
+| **[Install Command](docs/install.md)** | Installation command guide; leverages Homebrew for formulae/cask, and supports custom urls/installations scripts via sources |
+| **[Import Groups](docs/import.md)** | Import Anvil groups from files/URLs |
 | **[Doctor Command](docs/doctor.md)** | Health checks and validation |
+| **[Clean command](docs/clean.md)** | Cleans Anvil non-critical dependencies |
 
 **[View All Documentation →](docs/)**
 

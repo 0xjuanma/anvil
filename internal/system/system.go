@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package system provides system command execution and OS detection utilities.
+// It handles command execution with timeouts, environment setup, and platform detection.
 package system
 
 import (
@@ -82,8 +84,8 @@ func CommandExists(command string) bool {
 	return err == nil
 }
 
-// GetCommandPath returns the full path to a command if it exists
-func GetCommandPath(command string) (string, error) {
+// CommandPath returns the full path to a command if it exists
+func CommandPath(command string) (string, error) {
 	return exec.LookPath(command)
 }
 
@@ -128,8 +130,8 @@ func RunCommandInDirectoryWithTimeout(ctx context.Context, dir, command string, 
 	return result, nil
 }
 
-// GetEnvironmentVariable gets an environment variable with a default value
-func GetEnvironmentVariable(key, defaultValue string) string {
+// EnvironmentVariable gets an environment variable with a default value
+func EnvironmentVariable(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
 	}

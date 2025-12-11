@@ -117,30 +117,30 @@ func runInstallCommand(cmd *cobra.Command, target string) error {
 }
 
 // installGroup installs all tools in a group.
-func installGroup(groupName string, tools []string, dryRun bool, concurrent bool, maxWorkers int, timeout time.Duration) error {
+func installGroup(opts InstallGroupOptions) error {
 	o := palantir.GetGlobalOutputHandler()
-	o.PrintHeader(fmt.Sprintf("Installing '%s' group", groupName))
+	o.PrintHeader(fmt.Sprintf("Installing '%s' group", opts.GroupName))
 
-	if len(tools) == 0 {
-		return errors.NewInstallationError(constants.OpInstall, groupName,
-			fmt.Errorf("group '%s' has no tools defined", groupName))
+	if len(opts.Tools) == 0 {
+		return errors.NewInstallationError(constants.OpInstall, opts.GroupName,
+			fmt.Errorf("group '%s' has no tools defined", opts.GroupName))
 	}
 
 	// Deduplicate tools within the group and update settings if needed
-	deduplicatedTools, err := deduplicateGroupTools(groupName, tools)
+	deduplicatedTools, err := deduplicateGroupTools(opts.GroupName, opts.Tools)
 	if err != nil {
 		o.PrintWarning("Failed to deduplicate group tools: %v", err)
 	} else {
-		tools = deduplicatedTools
+		opts.Tools = deduplicatedTools
 	}
 
-	o.PrintInfo("Installing %d tools: %s", len(tools), strings.Join(tools, ", "))
+	o.PrintInfo("Installing %d tools: %s", len(opts.Tools), strings.Join(opts.Tools, ", "))
 
-	if concurrent {
-		return installGroupConcurrent(groupName, tools, dryRun, maxWorkers, timeout)
+	if opts.Concurrent {
+		return installGroupConcurrent(opts)
 	}
 
-	return installGroupSerial(groupName, tools, dryRun)
+	return installGroupSerial(opts.GroupName, opts.Tools, opts.DryRun)
 }
 
 // deduplicateGroupTools removes duplicate tools within a group and updates the settings file.
@@ -178,23 +178,23 @@ func deduplicateGroupTools(groupName string, tools []string) ([]string, error) {
 }
 
 // installGroupConcurrent installs tools concurrently.
-func installGroupConcurrent(groupName string, tools []string, dryRun bool, maxWorkers int, timeout time.Duration) error {
+func installGroupConcurrent(opts InstallGroupOptions) error {
 	o := palantir.GetGlobalOutputHandler()
 
 	// Create new output handler to send into concurrent installer
 	outputHandler := palantir.NewDefaultOutputHandler()
-	concurrentInstaller := installer.NewConcurrentInstaller(maxWorkers, outputHandler, dryRun)
+	concurrentInstaller := installer.NewConcurrentInstaller(opts.MaxWorkers, outputHandler, opts.DryRun)
 
-	if timeout > 0 {
-		concurrentInstaller.SetTimeout(timeout)
+	if opts.Timeout > 0 {
+		concurrentInstaller.SetTimeout(opts.Timeout)
 	}
 
 	// Create context with potential cancellation
 	ctx := context.Background()
-	stats, err := concurrentInstaller.InstallTools(ctx, tools)
+	stats, err := concurrentInstaller.InstallTools(ctx, opts.Tools)
 
 	// Track successfully installed apps
-	if !dryRun && stats != nil && stats.SuccessfulTools > 0 {
+	if !opts.DryRun && stats != nil && stats.SuccessfulTools > 0 {
 		o.PrintInfo("Updating settings to track installed apps...")
 		o.PrintInfo("Group installation tracking not implemented yet")
 	}

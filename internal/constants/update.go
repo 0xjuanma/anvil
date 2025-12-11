@@ -13,29 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
 
-import (
-	"os"
+package constants
 
-	"github.com/0xjuanma/anvil/cmd"
-	"github.com/0xjuanma/anvil/internal/terminal/charm"
-	"github.com/0xjuanma/anvil/internal/version"
+// Update script URLs
+const (
+	UpdateReleaseScriptURL = "https://github.com/0xjuanma/anvil/releases/latest/download/install.sh"
+	UpdateMainScriptURL    = "https://raw.githubusercontent.com/0xjuanma/anvil/master/install.sh"
 )
-
-// appVersion is set at build time via ldflags
-var appVersion = "dev-local"
-
-func main() {
-	// Initialize enhanced Charm output
-	charm.InitCharmOutput()
-
-	// Set application version
-	version.SetVersion(appVersion)
-
-	// Execute the CLI
-	if err := cmd.Execute(); err != nil {
-		// Error is already formatted with context by Execute()
-		os.Exit(1)
-	}
-}

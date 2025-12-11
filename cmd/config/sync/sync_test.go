@@ -61,15 +61,16 @@ func TestPerformSync_SingleFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := performSync(
-		"test-sync",
-		sourceFile,
-		destFile,
-		"Confirm sync?",
-		"Syncing...",
-		"Synced",
-		"Success",
-	)
+	opts := SyncOptions{
+		ArchivePrefix:  "test-sync",
+		SourcePath:     sourceFile,
+		DestPath:       destFile,
+		ConfirmMsg:     "Confirm sync?",
+		SpinnerMsg:     "Syncing...",
+		SpinnerSuccess: "Synced",
+		SuccessMsg:     "Success",
+	}
+	err := performSync(opts)
 
 	if err != nil {
 		t.Fatalf("performSync failed: %v", err)
@@ -111,15 +112,16 @@ func TestPerformSync_Directory_PreservesLocalFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := performSync(
-		"test-dir-sync",
-		sourceDir,
-		destDir,
-		"Confirm sync?",
-		"Syncing...",
-		"Synced",
-		"Success",
-	)
+	opts := SyncOptions{
+		ArchivePrefix:  "test-dir-sync",
+		SourcePath:     sourceDir,
+		DestPath:       destDir,
+		ConfirmMsg:     "Confirm sync?",
+		SpinnerMsg:     "Syncing...",
+		SpinnerSuccess: "Synced",
+		SuccessMsg:     "Success",
+	}
+	err := performSync(opts)
 
 	if err != nil {
 		t.Fatalf("performSync failed: %v", err)
@@ -168,15 +170,16 @@ func TestPerformSync_CreatesArchive(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := performSync(
-		"archive-test",
-		sourceDir,
-		destDir,
-		"Confirm?",
-		"Syncing...",
-		"Done",
-		"Success",
-	)
+	opts := SyncOptions{
+		ArchivePrefix:  "archive-test",
+		SourcePath:     sourceDir,
+		DestPath:       destDir,
+		ConfirmMsg:     "Confirm?",
+		SpinnerMsg:     "Syncing...",
+		SpinnerSuccess: "Done",
+		SuccessMsg:     "Success",
+	}
+	err := performSync(opts)
 
 	if err != nil {
 		t.Fatalf("performSync failed: %v", err)
@@ -214,15 +217,16 @@ func TestPerformSync_NestedDirectories(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := performSync(
-		"nested-test",
-		sourceDir,
-		destDir,
-		"Confirm?",
-		"Syncing...",
-		"Done",
-		"Success",
-	)
+	opts := SyncOptions{
+		ArchivePrefix:  "nested-test",
+		SourcePath:     sourceDir,
+		DestPath:       destDir,
+		ConfirmMsg:     "Confirm?",
+		SpinnerMsg:     "Syncing...",
+		SpinnerSuccess: "Done",
+		SuccessMsg:     "Success",
+	}
+	err := performSync(opts)
 
 	if err != nil {
 		t.Fatalf("performSync failed: %v", err)
@@ -243,15 +247,16 @@ func TestPerformSync_SourceNotExists(t *testing.T) {
 	sourceFile := filepath.Join(anvilDir, "nonexistent.yaml")
 	destFile := filepath.Join(anvilDir, "dest.yaml")
 
-	err := performSync(
-		"error-test",
-		sourceFile,
-		destFile,
-		"Confirm?",
-		"Syncing...",
-		"Done",
-		"Success",
-	)
+	opts := SyncOptions{
+		ArchivePrefix:  "error-test",
+		SourcePath:     sourceFile,
+		DestPath:       destFile,
+		ConfirmMsg:     "Confirm?",
+		SpinnerMsg:     "Syncing...",
+		SpinnerSuccess: "Done",
+		SuccessMsg:     "Success",
+	}
+	err := performSync(opts)
 
 	if err == nil {
 		t.Error("Expected error for non-existent source, got nil")
@@ -278,15 +283,16 @@ func TestPerformSync_WithExistingDestination(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err := performSync(
-		"overwrite-test",
-		sourceDir,
-		destDir,
-		"Confirm?",
-		"Syncing...",
-		"Done",
-		"Success",
-	)
+	opts := SyncOptions{
+		ArchivePrefix:  "overwrite-test",
+		SourcePath:     sourceDir,
+		DestPath:       destDir,
+		ConfirmMsg:     "Confirm?",
+		SpinnerMsg:     "Syncing...",
+		SpinnerSuccess: "Done",
+		SuccessMsg:     "Success",
+	}
+	err := performSync(opts)
 
 	if err != nil {
 		t.Fatalf("performSync failed: %v", err)

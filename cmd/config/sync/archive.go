@@ -27,7 +27,7 @@ import (
 	"github.com/0xjuanma/anvil/internal/utils"
 )
 
-// createArchiveDirectory creates a timestamped archive directory
+// createArchiveDirectory creates a timestamped archive directory.
 func createArchiveDirectory(prefix string) (string, error) {
 
 	// Create timestamp
@@ -43,7 +43,7 @@ func createArchiveDirectory(prefix string) (string, error) {
 	return archivePath, nil
 }
 
-// archiveExistingConfig archives the existing configuration
+// archiveExistingConfig archives the existing configuration.
 func archiveExistingConfig(configType, sourcePath, archivePath string) error {
 	// Check if source exists
 	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {

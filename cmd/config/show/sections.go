@@ -29,7 +29,7 @@ import (
 	"github.com/0xjuanma/palantir"
 )
 
-// showAnvilSettingsSection displays specific sections of the anvil settings
+// showAnvilSettingsSection displays specific sections of the anvil settings.
 func showAnvilSettingsSection(showGroups, showConfigs, showSources, showGit, showGitHub bool) error {
 	o := palantir.GetGlobalOutputHandler()
 
@@ -75,7 +75,7 @@ func showAnvilSettingsSection(showGroups, showConfigs, showSources, showGit, sho
 	return nil
 }
 
-// showGroupsSection displays the groups section using shared rendering functions
+// showGroupsSection displays the groups section using shared rendering functions.
 func showGroupsSection() error {
 	groups, builtInGroupNames, customGroupNames, installedApps, err := tools.LoadAndPrepareAppData()
 	if err != nil {
@@ -90,7 +90,7 @@ func showGroupsSection() error {
 	return nil
 }
 
-// showConfigsSection displays the configs section
+// showConfigsSection displays the configs section.
 func showConfigsSection(anvilConfig *config.AnvilConfig) error {
 	var boxContent strings.Builder
 
@@ -112,7 +112,7 @@ func showConfigsSection(anvilConfig *config.AnvilConfig) error {
 	return nil
 }
 
-// showSourcesSection displays the installation sources section
+// showSourcesSection displays the installation sources section.
 func showSourcesSection(anvilConfig *config.AnvilConfig) error {
 	var boxContent strings.Builder
 
@@ -133,7 +133,7 @@ func showSourcesSection(anvilConfig *config.AnvilConfig) error {
 	return nil
 }
 
-// showGitSection displays the git configuration section
+// showGitSection displays the git configuration section.
 func showGitSection(anvilConfig *config.AnvilConfig) error {
 	var boxContent strings.Builder
 
@@ -151,7 +151,7 @@ func showGitSection(anvilConfig *config.AnvilConfig) error {
 	return nil
 }
 
-// showGitHubSection displays the GitHub configuration section
+// showGitHubSection displays the GitHub configuration section.
 func showGitHubSection(anvilConfig *config.AnvilConfig) error {
 	var boxContent strings.Builder
 

@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package show provides functionality to display configuration files and
+// settings with intelligent formatting.
 package show
 
 import (
@@ -35,11 +37,8 @@ var ShowCmd = &cobra.Command{
 	Short: "Show configuration files from anvil settings or pulled directories",
 	Long:  constants.SHOW_COMMAND_LONG_DESCRIPTION,
 	Args:  cobra.MaximumNArgs(1), // Accept 0 or 1 argument
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := runShowCommand(cmd, args); err != nil {
-			palantir.GetGlobalOutputHandler().PrintError("Show failed: %v", err)
-			return
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runShowCommand(cmd, args)
 	},
 	Example: `  anvil config show                    # Show full anvil settings
   anvil config show --groups          # Show only groups
@@ -59,7 +58,7 @@ func init() {
 	ShowCmd.Flags().Bool("github", false, "Show only GitHub configuration (only applicable for anvil settings)")
 }
 
-// runShowCommand executes the configuration show process
+// runShowCommand executes the configuration show process.
 func runShowCommand(cmd *cobra.Command, args []string) error {
 	raw, _ := cmd.Flags().GetBool("raw")
 	groups, _ := cmd.Flags().GetBool("groups")
@@ -82,6 +81,7 @@ func runShowCommand(cmd *cobra.Command, args []string) error {
 	return showPulledConfig(targetDir)
 }
 
+// checkSettingsFileExists checks if the settings file exists.
 func checkSettingsFileExists(o palantir.OutputHandler, configPath string) error {
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		o.PrintError("Anvil settings file not found at: %s", configPath)
@@ -91,7 +91,7 @@ func checkSettingsFileExists(o palantir.OutputHandler, configPath string) error 
 	return nil
 }
 
-// showAnvilSettings displays the main anvil config file
+// showAnvilSettings displays the main anvil config file.
 func showAnvilSettings(raw bool) error {
 	o := palantir.GetGlobalOutputHandler()
 
@@ -146,7 +146,7 @@ func showAnvilSettings(raw bool) error {
 	return nil
 }
 
-// showPulledConfig displays configuration files from a pulled directory
+// showPulledConfig displays configuration files from a pulled directory.
 func showPulledConfig(targetDir string) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader(fmt.Sprintf("Configuration Directory: %s", targetDir))
@@ -198,7 +198,7 @@ func showPulledConfig(targetDir string) error {
 	return nil
 }
 
-// showSingleFile displays the content of a single configuration file
+// showSingleFile displays the content of a single configuration file.
 func showSingleFile(filePath, targetDir string) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader(fmt.Sprintf("Configuration: %s", targetDir))
@@ -214,5 +214,3 @@ func showSingleFile(filePath, targetDir string) error {
 	return nil
 }
 
-func init() {
-}

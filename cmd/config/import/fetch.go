@@ -29,7 +29,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// fetchFile downloads a file from URL or copies from local path to a temporary file
+// fetchFile downloads a file from URL or copies from local path to a temporary file.
 func fetchFile(sourcePath string) (string, func(), error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -42,13 +42,13 @@ func fetchFile(sourcePath string) (string, func(), error) {
 	return fetchFromLocal(sourcePath)
 }
 
-// isURL checks if the given string is a URL
+// isURL checks if the given string is a URL.
 func isURL(str string) bool {
 	u, err := url.Parse(str)
 	return err == nil && u.Scheme != "" && u.Host != ""
 }
 
-// fetchFromURL downloads file from URL to a temporary file
+// fetchFromURL downloads file from URL to a temporary file.
 func fetchFromURL(ctx context.Context, fileURL string) (string, func(), error) {
 	// Create HTTP request with context
 	req, err := http.NewRequestWithContext(ctx, "GET", fileURL, nil)
@@ -91,7 +91,7 @@ func fetchFromURL(ctx context.Context, fileURL string) (string, func(), error) {
 	return tempFile.Name(), cleanup, nil
 }
 
-// fetchFromLocal copies local file to temporary file for consistent handling
+// fetchFromLocal copies local file to temporary file for consistent handling.
 func fetchFromLocal(filePath string) (string, func(), error) {
 	// Validate file exists
 	if _, err := os.Stat(filePath); err != nil {
@@ -127,7 +127,7 @@ func fetchFromLocal(filePath string) (string, func(), error) {
 	return tempFile.Name(), cleanup, nil
 }
 
-// parseImportFile parses the import file and extracts only group data
+// parseImportFile parses the import file and extracts only group data.
 func parseImportFile(filePath string) (*ImportConfig, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {

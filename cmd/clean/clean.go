@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package clean provides functionality to clean all content inside .anvil
+// directories while preserving the directory structure and main config file.
 package clean
 
 import (
@@ -33,15 +35,13 @@ var CleanCmd = &cobra.Command{
 	Use:   "clean",
 	Short: "Clean all content inside .anvil directories",
 	Long:  constants.CLEAN_COMMAND_LONG_DESCRIPTION,
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := runCleanCommand(cmd, args); err != nil {
-			palantir.GetGlobalOutputHandler().PrintError("Clean failed: %v", err)
-			return
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runCleanCommand(cmd, args)
 	},
 }
 
-// runCleanCommand executes the clean process
+// runCleanCommand executes the clean process, scanning for items and
+// performing cleanup after user confirmation.
 func runCleanCommand(cmd *cobra.Command, args []string) error {
 	// Get command flags
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
@@ -89,7 +89,7 @@ func runCleanCommand(cmd *cobra.Command, args []string) error {
 	return performCleaning(output, itemsToClean)
 }
 
-// getAnvilDirectoryPath returns the path to the .anvil directory
+// getAnvilDirectoryPath returns the path to the .anvil directory.
 func getAnvilDirectoryPath() (string, error) {
 	homeDir, err := system.GetHomeDir()
 	if err != nil {
@@ -103,7 +103,7 @@ func getAnvilDirectoryPath() (string, error) {
 	return filepath.Join(homeDir, constants.ANVIL_CONFIG_DIR), nil
 }
 
-// getItemsToClean scans the anvil directory and returns items to clean
+// getItemsToClean scans the anvil directory and returns items to clean.
 func getItemsToClean(anvilDir string) ([]string, error) {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage(fmt.Sprintf("Scanning %s directory for content to clean", constants.ANVIL_CONFIG_DIR))
@@ -138,7 +138,7 @@ func getItemsToClean(anvilDir string) ([]string, error) {
 	return itemsToClean, nil
 }
 
-// performCleaning executes the actual cleaning process
+// performCleaning executes the actual cleaning process for all items.
 func performCleaning(output palantir.OutputHandler, itemsToClean []string) error {
 	output.PrintStage("Cleaning directories and files")
 
@@ -173,7 +173,8 @@ func performCleaning(output palantir.OutputHandler, itemsToClean []string) error
 	return nil
 }
 
-// cleanItem removes the contents of a directory or the file itself
+// cleanItem removes the contents of a directory or the file itself.
+// Special handling applies to the dotfiles directory which is removed entirely.
 func cleanItem(itemPath string) error {
 	info, err := os.Stat(itemPath)
 	if err != nil {
@@ -184,7 +185,7 @@ func cleanItem(itemPath string) error {
 		itemName := filepath.Base(itemPath)
 
 		// Special handling for dotfiles directory - remove it completely
-		if itemName == "dotfiles" {
+		if itemName == constants.DOTFILES_DIR {
 			// Remove the entire dotfiles directory to ensure clean git repository state
 			if err := os.RemoveAll(itemPath); err != nil {
 				return fmt.Errorf("failed to remove dotfiles directory: %w", err)

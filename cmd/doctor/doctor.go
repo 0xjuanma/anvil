@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package doctor provides health check functionality for the Anvil CLI,
+// validating environment, dependencies, configuration, and connectivity.
 package doctor
 
 import (
@@ -27,19 +29,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var allCategories = []string{"environment", "dependencies", "configuration", "connectivity"}
+
 var DoctorCmd = &cobra.Command{
 	Use:   "doctor [category|check]",
 	Short: "Run health checks and validate anvil environment",
 	Long:  constants.DOCTOR_COMMAND_LONG_DESCRIPTION,
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := runDoctorCommand(cmd, args); err != nil {
-			palantir.GetGlobalOutputHandler().PrintError("Doctor failed: %v", err)
-			return
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runDoctorCommand(cmd, args)
 	},
 }
 
-// runDoctorCommand executes the doctor validation process
+// runDoctorCommand executes the doctor validation process.
 func runDoctorCommand(cmd *cobra.Command, args []string) error {
 	// Get command flags
 	listChecks, _ := cmd.Flags().GetBool("list")
@@ -72,8 +73,7 @@ func runDoctorCommand(cmd *cobra.Command, args []string) error {
 	target := args[0]
 
 	// Check if it's a category first
-	categories := []string{"environment", "dependencies", "configuration", "connectivity"}
-	for _, category := range categories {
+	for _, category := range allCategories {
 		if target == category {
 			return runCategoryChecks(engine, category, verbose)
 		}
@@ -83,18 +83,18 @@ func runDoctorCommand(cmd *cobra.Command, args []string) error {
 	return runSingleCheck(engine, target, verbose)
 }
 
-// displayResults shows validation results in a formatted table
+// displayResults shows validation results in a formatted table.
 func displayResults(results []*validators.ValidationResult, verbose bool) {
 	categories := validators.FormatResultsTable(results)
 
-	for _, category := range []string{"environment", "dependencies", "configuration", "connectivity"} {
+	for _, category := range allCategories {
 		if categoryResults, exists := categories[category]; exists {
 			displayCategory(category, categoryResults, verbose)
 		}
 	}
 }
 
-// printSummary shows overall health check summary
+// printSummary shows overall health check summary.
 func printSummary(results []*validators.ValidationResult) {
 	passed, warned, failed, _ := validators.GetSummary(results)
 	total := len(results)
@@ -107,7 +107,7 @@ func printSummary(results []*validators.ValidationResult) {
 	dashboardContent.WriteString("\n")
 
 	// Category status bars
-	for _, category := range []string{"environment", "dependencies", "configuration", "connectivity"} {
+	for _, category := range allCategories {
 		if stats, exists := categoryStats[category]; exists {
 			status := getCategoryStatus(stats.passed, stats.warned, stats.failed, stats.skipped)
 

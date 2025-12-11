@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package importcmd provides functionality to import tool groups from local
+// files or remote URLs into the anvil configuration.
 package importcmd
 
 import (
@@ -34,21 +36,17 @@ var ImportCmd = &cobra.Command{
 	Short: "Import groups from a local file or URL",
 	Long:  "Import tool groups from a local YAML file or remote URL into your anvil configuration",
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		importPath := args[0]
-		if err := runImportCommand(cmd, importPath); err != nil {
-			palantir.GetGlobalOutputHandler().PrintError("Import failed: %v", err)
-			return
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runImportCommand(cmd, args[0])
 	},
 }
 
-// ImportConfig represents the structure for importing configurations
+// ImportConfig represents the structure for importing configurations.
 type ImportConfig struct {
 	Groups map[string][]string `yaml:"groups"`
 }
 
-// runImportCommand executes the group import process
+// runImportCommand executes the group import process.
 func runImportCommand(cmd *cobra.Command, importPath string) error {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintHeader("Import Groups from File")
@@ -123,7 +121,7 @@ func runImportCommand(cmd *cobra.Command, importPath string) error {
 	return nil
 }
 
-// validateImportGroups validates the structure of imported groups
+// validateImportGroups validates the structure of imported groups.
 func validateImportGroups(groups map[string][]string) error {
 	if len(groups) == 0 {
 		return fmt.Errorf("no groups found to import")
@@ -153,7 +151,7 @@ func validateImportGroups(groups map[string][]string) error {
 	return nil
 }
 
-// checkGroupConflicts checks if any imported groups already exist
+// checkGroupConflicts checks if any imported groups already exist.
 func checkGroupConflicts(importGroups map[string][]string, existingGroups config.AnvilGroups) []string {
 	var conflicts []string
 	for groupName := range importGroups {
@@ -165,7 +163,7 @@ func checkGroupConflicts(importGroups map[string][]string, existingGroups config
 	return conflicts
 }
 
-// displayImportSummary shows a tree view of groups that will be imported
+// displayImportSummary shows a tree view of groups that will be imported.
 func displayImportSummary(groups map[string][]string) {
 	output := palantir.GetGlobalOutputHandler()
 	fmt.Println("")
@@ -208,7 +206,7 @@ func displayImportSummary(groups map[string][]string) {
 	fmt.Println("")
 }
 
-// importGroups adds the imported groups to the current configuration
+// importGroups adds the imported groups to the current configuration.
 func importGroups(currentConfig *config.AnvilConfig, importGroups map[string][]string) error {
 	// Add new groups to existing configuration
 	for groupName, tools := range importGroups {

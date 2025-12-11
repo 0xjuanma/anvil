@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package config provides subcommands for managing configuration files and assets.
 package config
 
 import (
@@ -30,8 +31,8 @@ var ConfigCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage configuration files and assets",
 	Long:  constants.CONFIG_COMMAND_LONG_DESCRIPTION,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return cmd.Help()
 	},
 }
 

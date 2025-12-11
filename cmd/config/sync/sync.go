@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package sync provides functionality to sync pulled configuration files
+// to their local destinations with automatic archiving of existing files.
 package sync
 
 import (
@@ -31,20 +33,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// SyncOptions contains options for performing a sync operation.
+type SyncOptions struct {
+	ArchivePrefix  string
+	SourcePath     string
+	DestPath       string
+	ConfirmMsg     string
+	SpinnerMsg     string
+	SpinnerSuccess string
+	SuccessMsg     string
+}
+
 var SyncCmd = &cobra.Command{
 	Use:   "sync [app-name]",
 	Short: "Sync pulled configuration files to their local destinations",
 	Long:  constants.SYNC_COMMAND_LONG_DESCRIPTION,
 	Args:  cobra.MaximumNArgs(1), // Accept 0 or 1 argument
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := runSyncCommand(cmd, args); err != nil {
-			palantir.GetGlobalOutputHandler().PrintError("Sync failed: %v", err)
-			return
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runSyncCommand(cmd, args)
 	},
 }
 
-// runSyncCommand executes the configuration sync process
+// runSyncCommand executes the configuration sync process.
 func runSyncCommand(cmd *cobra.Command, args []string) error {
 	// Check for dry-run flag
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
@@ -59,7 +69,7 @@ func runSyncCommand(cmd *cobra.Command, args []string) error {
 	return syncAppConfig(appName, dryRun)
 }
 
-// syncAnvilSettings syncs the main anvil settings.yaml file
+// syncAnvilSettings syncs the main anvil settings.yaml file.
 func syncAnvilSettings(dryRun bool) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader("Configuration Sync: Anvil settings")
@@ -71,7 +81,7 @@ func syncAnvilSettings(dryRun bool) error {
 		o.PrintInfo("🔧 To fix this:")
 		o.PrintInfo("   • Run 'anvil config pull anvil' to download settings")
 		o.PrintInfo("   • Ensure your repository has an 'anvil' directory with settings.yaml")
-		return fmt.Errorf("config not pulled yet")
+		return fmt.Errorf(constants.ErrConfigNotPulled)
 	}
 
 	currentSettingsPath := config.GetAnvilConfigPath()
@@ -84,18 +94,19 @@ func syncAnvilSettings(dryRun bool) error {
 		return nil
 	}
 
-	return performSync(
-		"anvil-settings",
-		tempSettingsPath,
-		currentSettingsPath,
-		fmt.Sprintf("Sync local %s? Old copy will be archived.", constants.ANVIL_CONFIG_FILE),
-		"Syncing anvil settings",
-		"[Anvil] settings synced successfully",
-		"Sync done!",
-	)
+	opts := SyncOptions{
+		ArchivePrefix:  "anvil-settings",
+		SourcePath:     tempSettingsPath,
+		DestPath:       currentSettingsPath,
+		ConfirmMsg:     fmt.Sprintf("Sync local %s? Old copy will be archived.", constants.ANVIL_CONFIG_FILE),
+		SpinnerMsg:     constants.SpinnerSyncingAnvilSettings,
+		SpinnerSuccess: fmt.Sprintf("[Anvil] %s", constants.StatusSettingsSynced),
+		SuccessMsg:     "Sync done!",
+	}
+	return performSync(opts)
 }
 
-// syncAppConfig syncs configuration files for a specific app
+// syncAppConfig syncs configuration files for a specific app.
 func syncAppConfig(appName string, dryRun bool) error {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintHeader(fmt.Sprintf("Configuration Sync: %s", appName))
@@ -112,11 +123,11 @@ func syncAppConfig(appName string, dryRun bool) error {
 		output.PrintInfo("🔧 To fix this:")
 		output.PrintInfo("   • Run 'anvil config pull %s' to download configuration", appName)
 		output.PrintInfo("   • Ensure your repository has a '%s' directory", appName)
-		return fmt.Errorf("config not pulled yet")
+		return fmt.Errorf(constants.ErrConfigNotPulled)
 	}
 
 	if cfg.Configs == nil {
-		return fmt.Errorf("no configs section found in %s", constants.ANVIL_CONFIG_FILE)
+		return fmt.Errorf(constants.ErrNoConfigsSection, constants.ANVIL_CONFIG_FILE)
 	}
 
 	localConfigPath, exists := cfg.Configs[appName]
@@ -131,7 +142,7 @@ func syncAppConfig(appName string, dryRun bool) error {
 		output.PrintInfo("Example paths:")
 		output.PrintInfo("  • ~/.config/%s", appName)
 		output.PrintInfo("  • ~/Library/Application Support/%s", strings.Title(appName))
-		return fmt.Errorf("app config path not defined")
+		return fmt.Errorf(constants.ErrAppConfigNotDefined)
 	}
 
 	output.PrintInfo("Source: %s", tempAppPath)
@@ -142,22 +153,23 @@ func syncAppConfig(appName string, dryRun bool) error {
 		return nil
 	}
 
-	return performSync(
-		fmt.Sprintf("%s-configs", appName),
-		tempAppPath,
-		localConfigPath,
-		fmt.Sprintf("Sync %s configs? Old copy will be archived.", appName),
-		fmt.Sprintf("Syncing %s configuration", appName),
-		fmt.Sprintf("[%s] configuration synced successfully", strings.Title(appName)),
-		"Sync done!",
-	)
+	opts := SyncOptions{
+		ArchivePrefix:  fmt.Sprintf("%s-configs", appName),
+		SourcePath:     tempAppPath,
+		DestPath:       localConfigPath,
+		ConfirmMsg:     fmt.Sprintf("Sync %s configs? Old copy will be archived.", appName),
+		SpinnerMsg:     fmt.Sprintf("Syncing %s configuration", appName),
+		SpinnerSuccess: fmt.Sprintf("[%s] %s", strings.Title(appName), constants.StatusConfigurationSynced),
+		SuccessMsg:     "Sync done!",
+	}
+	return performSync(opts)
 }
 
-// performSync executes the core sync operation for any config type
-func performSync(archivePrefix, sourcePath, destPath, confirmMsg, spinnerMsg, spinnerSuccess, successMsg string) error {
+// performSync executes the core sync operation for any config type.
+func performSync(opts SyncOptions) error {
 	output := palantir.GetGlobalOutputHandler()
 
-	archivePath, err := createArchiveDirectory(archivePrefix)
+	archivePath, err := createArchiveDirectory(opts.ArchivePrefix)
 	if err != nil {
 		return fmt.Errorf("failed to create archive directory: %w", err)
 	}
@@ -165,7 +177,7 @@ func performSync(archivePrefix, sourcePath, destPath, confirmMsg, spinnerMsg, sp
 	output.PrintInfo("Archive: %s\n", archivePath)
 
 	if os.Getenv("ANVIL_TEST_MODE") != "true" {
-		if !output.Confirm(confirmMsg) {
+		if !output.Confirm(opts.ConfirmMsg) {
 			output.PrintInfo("Sync cancelled")
 			return nil
 		}
@@ -173,24 +185,24 @@ func performSync(archivePrefix, sourcePath, destPath, confirmMsg, spinnerMsg, sp
 
 	fmt.Println("")
 
-	spinner := charm.NewDotsSpinner(spinnerMsg)
+	spinner := charm.NewDotsSpinner(opts.SpinnerMsg)
 	spinner.Start()
 
-	if err := archiveExistingConfig(archivePrefix, destPath, archivePath); err != nil {
+	if err := archiveExistingConfig(opts.ArchivePrefix, opts.DestPath, archivePath); err != nil {
 		spinner.Error("Failed to archive existing config")
 		return fmt.Errorf("failed to archive existing config: %w", err)
 	}
 
-	sourceInfo, err := os.Stat(sourcePath)
+	sourceInfo, err := os.Stat(opts.SourcePath)
 	if err != nil {
 		spinner.Error("Failed to read source")
 		return fmt.Errorf("failed to read source: %w", err)
 	}
 
 	if sourceInfo.IsDir() {
-		err = utils.CopyDirectorySimple(sourcePath, destPath)
+		err = utils.CopyDirectorySimple(opts.SourcePath, opts.DestPath)
 	} else {
-		err = utils.CopyFileSimple(sourcePath, destPath)
+		err = utils.CopyFileSimple(opts.SourcePath, opts.DestPath)
 	}
 
 	if err != nil {
@@ -198,9 +210,9 @@ func performSync(archivePrefix, sourcePath, destPath, confirmMsg, spinnerMsg, sp
 		return fmt.Errorf("failed to copy new config: %w", err)
 	}
 
-	spinner.Success(spinnerSuccess)
+	spinner.Success(opts.SpinnerSuccess)
 
-	output.PrintSuccess(successMsg)
+	output.PrintSuccess(opts.SuccessMsg)
 	output.PrintInfo("Old configs archived to: %s", archivePath)
 	output.PrintInfo("Manual recovery possible from archive directory (no auto-recover yet)")
 

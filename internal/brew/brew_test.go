@@ -254,7 +254,7 @@ func TestBrewIntegrationWhenInstalled(t *testing.T) {
 		pkg, err := PackageInfo("git")
 		if err != nil {
 			// This might fail if git formula doesn't exist, which is ok
-			t.Logf("GetPackageInfo returned error: %v", err)
+			t.Logf("PackageInfo returned error: %v", err)
 		} else {
 			if pkg == nil {
 				t.Error("Expected package info, got nil")

@@ -274,8 +274,8 @@ func (gc *GitHubClient) configureGitUser(ctx context.Context) error {
 	return nil
 }
 
-// GetRepositoryStatus returns the current status of the local repository
-func (gc *GitHubClient) GetRepositoryStatus(ctx context.Context) (string, error) {
+// RepositoryStatus returns the current status of the local repository
+func (gc *GitHubClient) RepositoryStatus(ctx context.Context) (string, error) {
 	originalDir, err := os.Getwd()
 	if err != nil {
 		return "", errors.NewFileSystemError(constants.OpConfig, "getwd", err)

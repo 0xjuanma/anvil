@@ -122,7 +122,7 @@ func RunDiscoverLogic() error {
 // discoverHomebrewTools discovers tools installed via Homebrew using the --formula flag
 func discoverHomebrewTools() ([]string, error) {
 	tools := []string{}
-	homebrewTools, err := brew.GetInstalledPackages()
+	homebrewTools, err := brew.InstalledPackages()
 	if err != nil {
 		return nil, err
 	}

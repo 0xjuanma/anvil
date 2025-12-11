@@ -72,7 +72,7 @@ func installSingleTool(toolName string) error {
 	o := palantir.GetGlobalOutputHandler()
 
 	// Check if source is configured for this app (user explicitly configured it)
-	sourceURL, exists, sourceErr := installer.GetSourceURL(toolName)
+	sourceURL, exists, sourceErr := installer.SourceURL(toolName)
 	if sourceErr != nil {
 		o.PrintWarning("Failed to check source URL for %s: %v", toolName, sourceErr)
 		// Fall back to brew if we can't check source

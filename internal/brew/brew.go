@@ -238,8 +238,8 @@ func IsPackageInstalled(packageName string) bool {
 	return false
 }
 
-// GetInstalledPackages returns a list of installed packages (leaves only)
-func GetInstalledPackages() ([]BrewPackage, error) {
+// InstalledPackages returns a list of installed packages (leaves only)
+func InstalledPackages() ([]BrewPackage, error) {
 	if !IsBrewInstalled() {
 		return nil, fmt.Errorf("Homebrew is not installed")
 	}
@@ -294,8 +294,8 @@ func InstallPackages(packages []string) error {
 	return nil
 }
 
-// GetPackageInfo gets information about a package
-func GetPackageInfo(packageName string) (*BrewPackage, error) {
+// PackageInfo gets information about a package
+func PackageInfo(packageName string) (*BrewPackage, error) {
 	if !IsBrewInstalled() {
 		return nil, fmt.Errorf("Homebrew is not installed")
 	}

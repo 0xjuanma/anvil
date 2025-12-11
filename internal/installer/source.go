@@ -524,8 +524,8 @@ func findAppInDirectory(dir, appName string) string {
 	return foundApp
 }
 
-// GetSourceURL returns the source URL for an app if it exists
-func GetSourceURL(appName string) (string, bool, error) {
+// SourceURL returns the source URL for an app if it exists
+func SourceURL(appName string) (string, bool, error) {
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		return "", false, fmt.Errorf("failed to load config: %w", err)

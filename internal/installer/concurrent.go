@@ -246,7 +246,7 @@ func (ci *ConcurrentInstaller) installWithTimeout(ctx context.Context, tool stri
 // installSingleTool installs a single tool (similar to the original logic)
 func (ci *ConcurrentInstaller) installSingleTool(ctx context.Context, tool string, workerID int) error {
 	// Check if source is configured for this app (user explicitly configured it)
-	sourceURL, exists, sourceErr := GetSourceURL(tool)
+		sourceURL, exists, sourceErr := SourceURL(tool)
 	if sourceErr != nil {
 		ci.output.PrintWarning("Worker %d: Failed to check source URL for %s: %v", workerID, tool, sourceErr)
 		// Fall back to brew if we can't check source

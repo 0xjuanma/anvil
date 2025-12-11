@@ -48,18 +48,56 @@ anvil update
 
 ### Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `anvil init [--discover]` | Initialize your Anvil environment, dependencies & optionally discovers apps in your system|
-| `anvil doctor` | Check system health |
-| `anvil install [group-name]` | Install tools by groups|
-| `anvil config show [app-name]` | Show your anvil settings or app settings |
-| `anvil config push [app-name]` | Push your app configurations to GitHub |
-| `anvil config pull [app-name]` | Pull your app configurations from GitHub |
-| `anvil config sync [app-name]` | Sync your pulled app configurations to your local machine |
-| `anvil clean` | Clean your anvil environment |
-| `anvil update` | Update your anvil installation |
-| `anvil version` | Show the version of anvil |
+<table>
+<thead>
+<tr>
+<th style="padding: 8px 16px; text-align: center;">Command</th>
+<th style="padding: 8px 16px; text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding: 8px 16px; white-space: nowrap; text-align: center;"><code>anvil init [--discover]</code></td>
+<td style="padding: 8px 16px; text-align: left;">Initialize your Anvil environment, dependencies & optionally discovers apps in your system</td>
+</tr>
+<tr>
+<td style="padding: 8px 16px; white-space: nowrap; text-align: center;"><code>anvil doctor</code></td>
+<td style="padding: 8px 16px; text-align: left;">Check system health</td>
+</tr>
+<tr>
+<td style="padding: 8px 16px; white-space: nowrap; text-align: center;"><code>anvil install [group-name]</code></td>
+<td style="padding: 8px 16px; text-align: left;">Install tools by groups</td>
+</tr>
+<tr>
+<td style="padding: 8px 16px; white-space: nowrap; text-align: center;"><code>anvil config show [app-name]</code></td>
+<td style="padding: 8px 16px; text-align: left;">Show your anvil settings or app settings</td>
+</tr>
+<tr>
+<td style="padding: 8px 16px; white-space: nowrap; text-align: center;"><code>anvil config push [app-name]</code></td>
+<td style="padding: 8px 16px; text-align: left;">Push your app configurations to GitHub</td>
+</tr>
+<tr>
+<td style="padding: 8px 16px; white-space: nowrap; text-align: center;"><code>anvil config pull [app-name]</code></td>
+<td style="padding: 8px 16px; text-align: left;">Pull your app configurations from GitHub</td>
+</tr>
+<tr>
+<td style="padding: 8px 16px; white-space: nowrap; text-align: center;"><code>anvil config sync [app-name]</code></td>
+<td style="padding: 8px 16px; text-align: left;">Sync your pulled app configurations to your local machine</td>
+</tr>
+<tr>
+<td style="padding: 8px 16px; white-space: nowrap; text-align: center;"><code>anvil clean</code></td>
+<td style="padding: 8px 16px; text-align: left;">Clean your anvil environment</td>
+</tr>
+<tr>
+<td style="padding: 8px 16px; white-space: nowrap; text-align: center;"><code>anvil update</code></td>
+<td style="padding: 8px 16px; text-align: left;">Update your anvil installation</td>
+</tr>
+<tr>
+<td style="padding: 8px 16px; white-space: nowrap; text-align: center;"><code>anvil version</code></td>
+<td style="padding: 8px 16px; text-align: left;">Show the version of anvil</td>
+</tr>
+</tbody>
+</table>
 
 
 ### Try It Out

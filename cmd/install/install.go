@@ -23,7 +23,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/0xjuanma/anvil/internal/brew"
 	"github.com/0xjuanma/anvil/internal/config"
@@ -36,6 +35,16 @@ import (
 	"github.com/0xjuanma/palantir"
 	"github.com/spf13/cobra"
 )
+
+// InstallGroupOptions contains options for installing a group of tools.
+type InstallGroupOptions struct {
+	GroupName  string
+	Tools      []string
+	DryRun     bool
+	Concurrent bool
+	MaxWorkers int
+	Timeout    time.Duration
+}
 
 // InstallCmd represents the install command.
 var InstallCmd = &cobra.Command{
@@ -109,7 +118,15 @@ func runInstallCommand(cmd *cobra.Command, target string) error {
 
 	// Try to get group tools first
 	if tools, err := config.GetGroupTools(target); err == nil {
-		return installGroup(target, tools, dryRun, concurrent, maxWorkers, timeout)
+		opts := InstallGroupOptions{
+			GroupName:  target,
+			Tools:      tools,
+			DryRun:     dryRun,
+			Concurrent: concurrent,
+			MaxWorkers: maxWorkers,
+			Timeout:    timeout,
+		}
+		return installGroup(opts)
 	}
 
 	// If not a group, treat as individual application

@@ -25,7 +25,7 @@ import (
 	"github.com/0xjuanma/palantir"
 )
 
-// categoryStats holds statistics for a category
+// categoryStats holds statistics for a category.
 type categoryStats struct {
 	passed  int
 	warned  int
@@ -34,7 +34,7 @@ type categoryStats struct {
 	total   int
 }
 
-// getCategoryBreakdown returns stats broken down by category
+// getCategoryBreakdown returns stats broken down by category.
 func getCategoryBreakdown(results []*validators.ValidationResult) map[string]categoryStats {
 	breakdown := make(map[string]categoryStats)
 
@@ -84,7 +84,7 @@ func getCategoryStatus(passed, warned, failed, skipped int) string {
 	}
 }
 
-// displayCategory shows results for a specific category
+// displayCategory shows results for a specific category.
 func displayCategory(category string, results []*validators.ValidationResult, verbose bool) {
 	// Count statuses
 	passed, warned, failed, skipped := 0, 0, 0, 0
@@ -124,7 +124,7 @@ func displayCategory(category string, results []*validators.ValidationResult, ve
 	fmt.Println("")
 }
 
-// printCategoryResults prints results for a single category in a clean format
+// printCategoryResults prints results for a single category in a clean format.
 func printCategoryResults(category string, checkNames []string, statuses map[string]*checkStatus, results []*validators.ValidationResult, verbose bool) {
 	// Count status for this category
 	passed, warned, failed := 0, 0, 0

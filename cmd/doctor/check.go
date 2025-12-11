@@ -29,7 +29,7 @@ import (
 	"github.com/0xjuanma/palantir"
 )
 
-// showAvailableChecks displays all available checks organized by category
+// showAvailableChecks displays all available checks organized by category.
 func showAvailableChecks(engine *validators.DoctorEngine) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader("Available Health Checks")
@@ -46,7 +46,7 @@ func showAvailableChecks(engine *validators.DoctorEngine) error {
 	}
 
 	totalChecks := 0
-	for _, category := range []string{"environment", "dependencies", "configuration", "connectivity"} {
+	for _, category := range allCategories {
 		if checkNames, exists := checks[category]; exists {
 			o.PrintStage(fmt.Sprintf("anvil doctor %s", category))
 			o.PrintInfo("    %s", categoryDescriptions[category])
@@ -58,7 +58,7 @@ func showAvailableChecks(engine *validators.DoctorEngine) error {
 
 	o.PrintInfo("🔍 SPECIFIC CHECKS (run individual validators):\n")
 
-	for _, category := range []string{"environment", "dependencies", "configuration", "connectivity"} {
+	for _, category := range allCategories {
 		if checkNames, exists := checks[category]; exists {
 			o.PrintStage(fmt.Sprintf("%s checks:", strings.Title(category)))
 			for _, checkName := range checkNames {
@@ -78,7 +78,7 @@ func showAvailableChecks(engine *validators.DoctorEngine) error {
 	return nil
 }
 
-// runSingleCheck executes a specific health check
+// runSingleCheck executes a specific health check.
 func runSingleCheck(engine *validators.DoctorEngine, checkName string, verbose bool) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader(fmt.Sprintf("Running Check: %s", checkName))
@@ -108,7 +108,7 @@ func runSingleCheck(engine *validators.DoctorEngine, checkName string, verbose b
 	return nil
 }
 
-// runCategoryChecks executes all checks in a specific category
+// runCategoryChecks executes all checks in a specific category.
 func runCategoryChecks(engine *validators.DoctorEngine, category string, verbose bool) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader(fmt.Sprintf("Running %s Health Checks", strings.Title(category)))
@@ -169,7 +169,7 @@ type checkStatus struct {
 	message string
 }
 
-// runAllChecks executes all available health checks
+// runAllChecks executes all available health checks.
 func runAllChecks(engine *validators.DoctorEngine, verbose bool) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader("Running Anvil Health Check")
@@ -182,11 +182,9 @@ func runAllChecks(engine *validators.DoctorEngine, verbose bool) error {
 	totalChecks := len(allValidators)
 
 	// Group validators by category
-	categories := map[string][]string{
-		"environment":   {},
-		"dependencies":  {},
-		"configuration": {},
-		"connectivity":  {},
+	categories := make(map[string][]string)
+	for _, cat := range allCategories {
+		categories[cat] = []string{}
 	}
 
 	for _, v := range allValidators {
@@ -254,7 +252,7 @@ func runAllChecks(engine *validators.DoctorEngine, verbose bool) error {
 
 	// Print organized results by category
 	fmt.Println()
-	for _, category := range []string{"environment", "dependencies", "configuration", "connectivity"} {
+	for _, category := range allCategories {
 		if checkNames, exists := categories[category]; exists && len(checkNames) > 0 {
 			printCategoryResults(category, checkNames, checkStatuses, results, verbose)
 		}

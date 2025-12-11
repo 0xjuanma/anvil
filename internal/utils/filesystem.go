@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package utils provides utility functions for file operations, formatting, and rendering.
+// It includes file system operations, text formatting helpers, and tree/list rendering utilities.
 package utils
 
 import (

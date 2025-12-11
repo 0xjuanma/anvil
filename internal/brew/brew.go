@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package brew provides Homebrew package management and installation capabilities.
+// It handles package installation, availability checking, and Homebrew setup
+// for both macOS and Linux systems.
 package brew
 
 import (

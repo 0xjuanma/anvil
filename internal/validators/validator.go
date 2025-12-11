@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package validators provides a validation framework for the Anvil CLI doctor command.
+// It defines validator interfaces, result types, and a registry system for managing
+// health checks across different categories (environment, dependencies, configuration, connectivity).
 package validators
 
 import (

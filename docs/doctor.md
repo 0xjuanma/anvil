@@ -1,6 +1,6 @@
 # Doctor Command
 
-The `anvil doctor` command provides health checks to validate your development environment and troubleshoot configuration issues.
+The `anvil doctor` command provides health checks to validate your development environment and troubleshoot configuration issues. This command also provides automatic ways of fixing the issues found.
 
 ## Usage
 

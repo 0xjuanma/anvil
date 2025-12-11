@@ -41,16 +41,27 @@ type GitHubClient struct {
 	Email      string
 }
 
-// NewGitHubClient creates a new GitHub client
-func NewGitHubClient(repoURL, branch, localPath, token, sshKeyPath, username, email string) *GitHubClient {
+// GitHubClientOptions holds options for creating a GitHubClient
+type GitHubClientOptions struct {
+	RepoURL    string
+	Branch     string
+	LocalPath  string
+	Token      string
+	SSHKeyPath string
+	Username   string
+	Email      string
+}
+
+// NewGitHubClient creates a new GitHub client with the provided options
+func NewGitHubClient(opts GitHubClientOptions) *GitHubClient {
 	return &GitHubClient{
-		RepoURL:    repoURL,
-		Branch:     branch,
-		LocalPath:  localPath,
-		Token:      token,
-		SSHKeyPath: sshKeyPath,
-		Username:   username,
-		Email:      email,
+		RepoURL:    opts.RepoURL,
+		Branch:     opts.Branch,
+		LocalPath:  opts.LocalPath,
+		Token:      opts.Token,
+		SSHKeyPath: opts.SSHKeyPath,
+		Username:   opts.Username,
+		Email:      opts.Email,
 	}
 }
 

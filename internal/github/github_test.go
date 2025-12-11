@@ -80,7 +80,15 @@ func TestNewGitHubClient(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client := NewGitHubClient(tt.repoURL, tt.branch, tt.localPath, tt.token, tt.sshKeyPath, tt.username, tt.email)
+			client := NewGitHubClient(GitHubClientOptions{
+				RepoURL:    tt.repoURL,
+				Branch:     tt.branch,
+				LocalPath:  tt.localPath,
+				Token:      tt.token,
+				SSHKeyPath: tt.sshKeyPath,
+				Username:   tt.username,
+				Email:      tt.email,
+			})
 
 			if client.RepoURL != tt.repoURL {
 				t.Errorf("Expected RepoURL to be %s, got %s", tt.repoURL, client.RepoURL)
@@ -502,6 +510,14 @@ func BenchmarkGenerateTimestampedBranchName(b *testing.B) {
 
 func BenchmarkNewGitHubClient(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		NewGitHubClient("user/repo", "main", "/tmp/repo", "token", "/path/to/key", "user", "email@example.com")
+		NewGitHubClient(GitHubClientOptions{
+			RepoURL:    "user/repo",
+			Branch:     "main",
+			LocalPath:  "/tmp/repo",
+			Token:      "token",
+			SSHKeyPath: "/path/to/key",
+			Username:   "user",
+			Email:      "email@example.com",
+		})
 	}
 }

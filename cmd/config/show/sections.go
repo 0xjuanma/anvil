@@ -77,18 +77,13 @@ func showAnvilSettingsSection(showGroups, showConfigs, showSources, showGit, sho
 
 // showGroupsSection displays the groups section using shared rendering functions.
 func showGroupsSection() error {
-	groups, builtInGroupNames, customGroupNames, installedApps, err := tools.LoadAndPrepareAppData()
+	appData, err := tools.LoadAndPrepareAppData()
 	if err != nil {
 		return err
 	}
 
 	// Use the shared tree view renderer
-	content := utils.RenderTreeView(utils.AppData{
-		Groups:            groups,
-		BuiltInGroupNames: builtInGroupNames,
-		CustomGroupNames:  customGroupNames,
-		InstalledApps:     installedApps,
-	})
+	content := utils.RenderTreeView(appData)
 
 	fmt.Println(charm.RenderBox("Groups", content, "#E0C867", false))
 

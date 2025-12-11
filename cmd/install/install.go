@@ -65,7 +65,7 @@ var InstallCmd = &cobra.Command{
 
 		if treeFlag || listFlag {
 			// Load and prepare data once
-			groups, builtInGroupNames, customGroupNames, installedApps, err := tools.LoadAndPrepareAppData()
+			appData, err := tools.LoadAndPrepareAppData()
 			if err != nil {
 				return fmt.Errorf("failed to load application data: %w", err)
 			}
@@ -74,20 +74,10 @@ var InstallCmd = &cobra.Command{
 			var content string
 			var title = "Available Applications"
 			if treeFlag {
-				content = utils.RenderTreeView(utils.AppData{
-					Groups:            groups,
-					BuiltInGroupNames: builtInGroupNames,
-					CustomGroupNames:  customGroupNames,
-					InstalledApps:     installedApps,
-				})
+				content = utils.RenderTreeView(appData)
 				title = fmt.Sprintf("%s (Tree View)", title)
 			} else {
-				content = utils.RenderListView(utils.AppData{
-					Groups:            groups,
-					BuiltInGroupNames: builtInGroupNames,
-					CustomGroupNames:  customGroupNames,
-					InstalledApps:     installedApps,
-				})
+				content = utils.RenderListView(appData)
 				title = fmt.Sprintf("%s (List View)", title)
 			}
 

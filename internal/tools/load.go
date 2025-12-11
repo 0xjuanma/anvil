@@ -23,41 +23,43 @@ import (
 	"github.com/0xjuanma/anvil/internal/config"
 	"github.com/0xjuanma/anvil/internal/constants"
 	"github.com/0xjuanma/anvil/internal/errors"
+	"github.com/0xjuanma/anvil/internal/utils"
 	"github.com/0xjuanma/palantir"
 )
 
 // LoadAndPrepareAppData loads all application data and prepares it for rendering
-// This function is copied from the install package to maintain consistency
-func LoadAndPrepareAppData() (groups map[string][]string, builtInGroupNames []string, customGroupNames []string, installedApps []string, err error) {
+func LoadAndPrepareAppData() (utils.AppData, error) {
+	var data utils.AppData
+
 	// Load groups from config
-	groups, err = config.AvailableGroups()
+	groups, err := config.AvailableGroups()
 	if err != nil {
-		err = errors.NewConfigurationError(constants.OpShow, "load-data",
+		return data, errors.NewConfigurationError(constants.OpShow, "load-data",
 			fmt.Errorf("failed to load groups: %w", err))
-		return
 	}
+	data.Groups = groups
 
 	// Get built-in group names
-	builtInGroupNames = config.BuiltInGroups()
+	data.BuiltInGroupNames = config.BuiltInGroups()
 
 	// Extract and sort custom group names
 	for groupName := range groups {
 		if !config.IsBuiltInGroup(groupName) {
-			customGroupNames = append(customGroupNames, groupName)
+			data.CustomGroupNames = append(data.CustomGroupNames, groupName)
 		}
 	}
-	sort.Strings(customGroupNames)
+	sort.Strings(data.CustomGroupNames)
 
 	// Load and sort installed apps
-	installedApps, err = config.InstalledApps()
+	installedApps, err := config.InstalledApps()
 	if err != nil {
 		// Don't fail on installed apps error, just log warning
 		palantir.GetGlobalOutputHandler().PrintWarning("Failed to load installed apps: %v", err)
-		installedApps = []string{}
-		err = nil // Reset error since we can continue
+		data.InstalledApps = []string{}
 	} else {
 		sort.Strings(installedApps)
+		data.InstalledApps = installedApps
 	}
 
-	return
+	return data, nil
 }

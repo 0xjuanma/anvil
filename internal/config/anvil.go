@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package config provides configuration management for the Anvil CLI.
+// It handles loading, saving, and managing YAML configuration files,
+// as well as app tracking, group management, and path resolution.
 package config
 
 import (
@@ -38,20 +41,20 @@ type AnvilConfig struct {
 	GitHub  GitHubConfig      `yaml:"github"`
 }
 
-// GetAnvilConfigDirectory returns the path to the anvil config directory
-func GetAnvilConfigDirectory() string {
+// AnvilConfigDirectory returns the path to the anvil config directory
+func AnvilConfigDirectory() string {
 	homeDir, _ := system.HomeDir()
 	return filepath.Join(homeDir, constants.ANVIL_CONFIG_DIR)
 }
 
-// GetAnvilConfigPath returns the path to the anvil config file
-func GetAnvilConfigPath() string {
-	return fmt.Sprintf("%s/%s", GetAnvilConfigDirectory(), constants.ANVIL_CONFIG_FILE)
+// AnvilConfigPath returns the path to the anvil config file
+func AnvilConfigPath() string {
+	return fmt.Sprintf("%s/%s", AnvilConfigDirectory(), constants.ANVIL_CONFIG_FILE)
 }
 
 // LoadConfig loads the anvil configuration from settings.yaml
 func LoadConfig() (*AnvilConfig, error) {
-	configPath := GetAnvilConfigPath()
+	configPath := AnvilConfigPath()
 
 	data, err := os.ReadFile(configPath)
 	if err != nil {
@@ -104,7 +107,7 @@ func LoadSampleConfigWithVersion(version string) (*AnvilConfig, error) {
 
 // SaveConfig saves the anvil configuration to settings.yaml
 func SaveConfig(config *AnvilConfig) error {
-	configPath := GetAnvilConfigPath()
+	configPath := AnvilConfigPath()
 
 	data, err := yaml.Marshal(config)
 	if err != nil {

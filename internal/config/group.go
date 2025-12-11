@@ -18,8 +18,8 @@ package config
 
 import "fmt"
 
-// GetGroupTools returns the tools for a specific group
-func GetGroupTools(groupName string) ([]string, error) {
+// GroupTools returns the tools for a specific group
+func GroupTools(groupName string) ([]string, error) {
 	var result []string
 	err := withConfig(func(config *AnvilConfig) error {
 		// Check if the group exists in the Groups map
@@ -32,8 +32,8 @@ func GetGroupTools(groupName string) ([]string, error) {
 	return result, err
 }
 
-// GetAvailableGroups returns all available groups
-func GetAvailableGroups() (map[string][]string, error) {
+// AvailableGroups returns all available groups
+func AvailableGroups() (map[string][]string, error) {
 	var groups map[string][]string
 	err := withConfig(func(config *AnvilConfig) error {
 		groups = make(map[string][]string)
@@ -46,8 +46,8 @@ func GetAvailableGroups() (map[string][]string, error) {
 	return groups, err
 }
 
-// GetBuiltInGroups returns the list of built-in group names
-func GetBuiltInGroups() []string {
+// BuiltInGroups returns the list of built-in group names
+func BuiltInGroups() []string {
 	return builtInGroups
 }
 

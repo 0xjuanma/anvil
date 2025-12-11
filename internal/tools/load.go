@@ -30,7 +30,7 @@ import (
 // This function is copied from the install package to maintain consistency
 func LoadAndPrepareAppData() (groups map[string][]string, builtInGroupNames []string, customGroupNames []string, installedApps []string, err error) {
 	// Load groups from config
-	groups, err = config.GetAvailableGroups()
+	groups, err = config.AvailableGroups()
 	if err != nil {
 		err = errors.NewConfigurationError(constants.OpShow, "load-data",
 			fmt.Errorf("failed to load groups: %w", err))
@@ -38,7 +38,7 @@ func LoadAndPrepareAppData() (groups map[string][]string, builtInGroupNames []st
 	}
 
 	// Get built-in group names
-	builtInGroupNames = config.GetBuiltInGroups()
+	builtInGroupNames = config.BuiltInGroups()
 
 	// Extract and sort custom group names
 	for groupName := range groups {
@@ -49,7 +49,7 @@ func LoadAndPrepareAppData() (groups map[string][]string, builtInGroupNames []st
 	sort.Strings(customGroupNames)
 
 	// Load and sort installed apps
-	installedApps, err = config.GetInstalledApps()
+	installedApps, err = config.InstalledApps()
 	if err != nil {
 		// Don't fail on installed apps error, just log warning
 		palantir.GetGlobalOutputHandler().PrintWarning("Failed to load installed apps: %v", err)

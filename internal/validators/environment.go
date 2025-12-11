@@ -38,7 +38,7 @@ func (v *InitRunValidator) Description() string {
 func (v *InitRunValidator) CanFix() bool { return false }
 
 func (v *InitRunValidator) Validate(ctx context.Context, cfg *config.AnvilConfig) *ValidationResult {
-	configPath := config.GetAnvilConfigPath()
+	configPath := config.AnvilConfigPath()
 
 	// Check if settings.yaml exists
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
@@ -92,7 +92,7 @@ func (v *SettingsFileValidator) Description() string {
 func (v *SettingsFileValidator) CanFix() bool { return false }
 
 func (v *SettingsFileValidator) Validate(ctx context.Context, cfg *config.AnvilConfig) *ValidationResult {
-	configPath := config.GetAnvilConfigPath()
+	configPath := config.AnvilConfigPath()
 
 	// Check file exists
 	info, err := os.Stat(configPath)
@@ -146,7 +146,7 @@ func (v *SettingsFileValidator) Validate(ctx context.Context, cfg *config.AnvilC
 }
 
 func (v *SettingsFileValidator) Fix(ctx context.Context, cfg *config.AnvilConfig) error {
-	configPath := config.GetAnvilConfigPath()
+	configPath := config.AnvilConfigPath()
 
 	// Fix file permissions
 	if err := os.Chmod(configPath, constants.FilePerm); err != nil {
@@ -167,7 +167,7 @@ func (v *DirectoryStructureValidator) Description() string {
 func (v *DirectoryStructureValidator) CanFix() bool { return true }
 
 func (v *DirectoryStructureValidator) Validate(ctx context.Context, cfg *config.AnvilConfig) *ValidationResult {
-	anvilDir := config.GetAnvilConfigDirectory()
+	anvilDir := config.AnvilConfigDirectory()
 
 	// Required directories
 	requiredDirs := []string{
@@ -224,7 +224,7 @@ func (v *DirectoryStructureValidator) Validate(ctx context.Context, cfg *config.
 }
 
 func (v *DirectoryStructureValidator) Fix(ctx context.Context, cfg *config.AnvilConfig) error {
-	anvilDir := config.GetAnvilConfigDirectory()
+	anvilDir := config.AnvilConfigDirectory()
 
 	// Create required directories
 	requiredDirs := []string{

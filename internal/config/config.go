@@ -180,7 +180,7 @@ func LoadSampleConfig() (*AnvilConfig, error) {
 
 // CreateDirectories creates necessary directories for anvil
 func CreateDirectories() error {
-	configDir := GetAnvilConfigDirectory()
+	configDir := AnvilConfigDirectory()
 
 	// Only create the main config directory
 	if err := utils.EnsureDirectory(configDir); err != nil {
@@ -197,7 +197,7 @@ func GenerateDefaultSettings() error {
 
 // GenerateDefaultSettingsWithVersion generates the default settings.yaml file with a specific version
 func GenerateDefaultSettingsWithVersion(version string) error {
-	configPath := GetAnvilConfigPath()
+	configPath := AnvilConfigPath()
 
 	// Check if settings.yaml already exists
 	if _, err := os.Stat(configPath); err == nil {
@@ -281,8 +281,8 @@ func AddInstalledApp(appName string) error {
 	})
 }
 
-// GetInstalledApps returns the list of individually installed applications
-func GetInstalledApps() ([]string, error) {
+// InstalledApps returns the list of individually installed applications
+func InstalledApps() ([]string, error) {
 	var apps []string
 	err := withConfig(func(config *AnvilConfig) error {
 		apps = config.Tools.InstalledApps
@@ -350,8 +350,8 @@ func (ls LocationSource) String() string {
 	}
 }
 
-// GetAppConfigPath checks if an app has a configured local path in the configs section
-func GetAppConfigPath(appName string) (string, bool, error) {
+// AppConfigPath checks if an app has a configured local path in the configs section
+func AppConfigPath(appName string) (string, bool, error) {
 	config, err := getCachedConfig()
 	if err != nil {
 		return "", false, fmt.Errorf("failed to load config: %w", err)
@@ -374,9 +374,9 @@ func GetAppConfigPath(appName string) (string, bool, error) {
 	return path, true, nil
 }
 
-// GetTempAppPath checks if an app directory exists in the temp directory (from previous pull)
-func GetTempAppPath(appName string) (string, bool, error) {
-	tempPath := filepath.Join(GetAnvilConfigDirectory(), "temp", appName)
+// TempAppPath checks if an app directory exists in the temp directory (from previous pull)
+func TempAppPath(appName string) (string, bool, error) {
+	tempPath := filepath.Join(AnvilConfigDirectory(), "temp", appName)
 	if _, err := os.Stat(tempPath); os.IsNotExist(err) {
 		return "", false, nil
 	}
@@ -387,14 +387,14 @@ func GetTempAppPath(appName string) (string, bool, error) {
 // ResolveAppLocation finds the config location for an app following the priority order
 func ResolveAppLocation(appName string) (string, LocationSource, error) {
 	// Priority 1: Check configs section in settings.yaml
-	if path, found, err := GetAppConfigPath(appName); err != nil {
+	if path, found, err := AppConfigPath(appName); err != nil {
 		return "", LocationConfigs, err
 	} else if found {
 		return path, LocationConfigs, nil
 	}
 
 	// Priority 2: Check temp directory (pulled configs)
-	if path, found, err := GetTempAppPath(appName); err != nil {
+	if path, found, err := TempAppPath(appName); err != nil {
 		return "", LocationTemp, err
 	} else if found {
 		return path, LocationTemp, nil
@@ -413,8 +413,8 @@ func SetAppConfigPath(appName, configPath string) error {
 	})
 }
 
-// GetConfiguredApps returns a list of all apps that have configured paths
-func GetConfiguredApps() ([]string, error) {
+// ConfiguredApps returns a list of all apps that have configured paths
+func ConfiguredApps() ([]string, error) {
 	var apps []string
 	err := withConfig(func(config *AnvilConfig) error {
 		for appName := range config.Configs {

@@ -144,17 +144,8 @@ func PopulateGitConfigFromSystem(gitConfig *GitConfig) error {
 	homeDir, _ := system.HomeDir()
 	sshDir := filepath.Join(homeDir, ".ssh")
 
-	// Common SSH key names in order of preference
-	commonKeyNames := []string{
-		"id_ed25519",
-		"id_ed25519_personal",
-		"id_rsa",
-		"id_rsa_personal",
-		"id_ecdsa",
-	}
-
 	// Find the first existing SSH key
-	for _, keyName := range commonKeyNames {
+	for _, keyName := range constants.CommonSSHKeyNames {
 		keyPath := filepath.Join(sshDir, keyName)
 		if _, err := os.Stat(keyPath); err == nil {
 			gitConfig.SSHKeyPath = keyPath
@@ -164,7 +155,7 @@ func PopulateGitConfigFromSystem(gitConfig *GitConfig) error {
 
 	// If no common keys found, use the default path (will be created if needed)
 	if gitConfig.SSHKeyPath == "" {
-		gitConfig.SSHKeyPath = filepath.Join(sshDir, "id_ed25519")
+		gitConfig.SSHKeyPath = filepath.Join(sshDir, constants.DefaultSSHKeyName)
 	}
 
 	return nil
@@ -248,9 +239,8 @@ func CheckEnvironmentConfigurations() []string {
 		warnings = append(warnings, "Set up SSH keys for GitHub: ssh-keygen -t ed25519 -C 'your.email@example.com'")
 	} else {
 		// Check for common SSH key files
-		keyFiles := []string{"id_rsa", "id_ed25519", "id_ecdsa"}
 		hasKey := false
-		for _, keyFile := range keyFiles {
+		for _, keyFile := range constants.CommonSSHKeyFiles {
 			if _, err := os.Stat(filepath.Join(sshDir, keyFile)); err == nil {
 				hasKey = true
 				break

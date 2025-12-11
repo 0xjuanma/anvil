@@ -16,6 +16,8 @@ limitations under the License.
 package main
 
 import (
+	"os"
+
 	"github.com/0xjuanma/anvil/cmd"
 	"github.com/0xjuanma/anvil/internal/terminal/charm"
 	"github.com/0xjuanma/anvil/internal/version"
@@ -32,5 +34,8 @@ func main() {
 	version.SetVersion(appVersion)
 
 	// Execute the CLI
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		// Error is already formatted with context by Execute()
+		os.Exit(1)
+	}
 }

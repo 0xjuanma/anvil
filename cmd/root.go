@@ -13,11 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+// Package cmd provides the root command and command structure for the Anvil CLI.
+// It sets up the command hierarchy and provides the main entry point for all
+// Anvil subcommands.
 package cmd
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/0xjuanma/anvil/cmd/clean"
@@ -37,27 +40,29 @@ var rootCmd = &cobra.Command{
 	Use:   constants.ANVIL,
 	Short: "🔥 One CLI to rule them all.",
 	Long:  fmt.Sprintf("%s\n\n%s", constants.AnvilLogo, constants.ANVIL_LONG_DESCRIPTION),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// Check if version flag was used
 		if versionFlag, _ := cmd.Flags().GetBool("version"); versionFlag {
 			showVersionInfo()
-			return
+			return nil
 		}
 
 		showWelcomeBanner()
+		return nil
 	},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
+// Execute runs the root command and handles any errors that occur during
+// command execution. This is the main entry point called by main.main().
+func Execute() error {
+	if err := rootCmd.Execute(); err != nil {
+		return fmt.Errorf("root command execution failed: %w", err)
 	}
+	return nil
 }
 
-// showWelcomeBanner displays the enhanced welcome banner
+// showWelcomeBanner displays the enhanced welcome banner with quick start
+// information when Anvil is run without arguments.
 func showWelcomeBanner() {
 	// Main banner
 	bannerContent := fmt.Sprintf("%s\n🔥 One CLI to rule them all 🔥\n\tversion: %s\n\n", constants.AnvilLogo, version.GetVersion())
@@ -82,7 +87,8 @@ func showWelcomeBanner() {
 	fmt.Println("  Documentation: anvil --help")
 }
 
-// showVersionInfo displays the version information with branding
+// showVersionInfo displays the version information with branding when
+// the --version flag is used.
 func showVersionInfo() {
 	fmt.Println(charm.RenderBox("ANVIL CLI", version.GetVersion(), "#FF6B9D", true))
 }
@@ -97,7 +103,6 @@ func init() {
 
 	// Add version flag
 	rootCmd.Flags().BoolP("version", "v", false, "Show version information")
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	// Set custom help template
 	rootCmd.SetHelpFunc(customHelpFunc)

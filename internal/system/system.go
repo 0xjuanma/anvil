@@ -50,14 +50,8 @@ func RunCommandWithTimeout(ctx context.Context, command string, args ...string) 
 	cmd := exec.CommandContext(ctx, command, args...)
 
 	// For git commands, ensure non-interactive mode to prevent credential prompts
-	if command == "git" {
-		// Set environment variables to prevent credential prompts
-		cmd.Env = append(os.Environ(),
-			"GIT_TERMINAL_PROMPT=0",  // Disable terminal prompts
-			"GIT_ASKPASS=/bin/false", // Disable credential prompts
-			"SSH_ASKPASS=/bin/false", // Disable SSH passphrase prompts
-			"GIT_SSH_COMMAND=ssh -o BatchMode=yes -o StrictHostKeyChecking=no", // Non-interactive SSH
-		)
+	if command == constants.GitCommand {
+		cmd.Env = append(os.Environ(), constants.GitNonInteractiveEnvVars()...)
 	}
 
 	// Capture both stdout and stderr
@@ -103,14 +97,8 @@ func RunCommandInDirectoryWithTimeout(ctx context.Context, dir, command string, 
 	cmd.Dir = dir
 
 	// For git commands, ensure non-interactive mode to prevent credential prompts
-	if command == "git" {
-		// Set environment variables to prevent credential prompts
-		cmd.Env = append(os.Environ(),
-			"GIT_TERMINAL_PROMPT=0",  // Disable terminal prompts
-			"GIT_ASKPASS=/bin/false", // Disable credential prompts
-			"SSH_ASKPASS=/bin/false", // Disable SSH passphrase prompts
-			"GIT_SSH_COMMAND=ssh -o BatchMode=yes -o StrictHostKeyChecking=no", // Non-interactive SSH
-		)
+	if command == constants.GitCommand {
+		cmd.Env = append(os.Environ(), constants.GitNonInteractiveEnvVars()...)
 	}
 
 	output, err := cmd.CombinedOutput()

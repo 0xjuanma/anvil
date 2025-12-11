@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package pull provides functionality to pull configuration files from
+// a GitHub repository to a temporary location for review.
 package pull
 
 import (
@@ -39,15 +41,40 @@ var PullCmd = &cobra.Command{
 	Short: "Pull configuration files from a specific directory in GitHub repository",
 	Long:  constants.PULL_COMMAND_LONG_DESCRIPTION,
 	Args:  cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := runPullCommand(cmd, args); err != nil {
-			palantir.GetGlobalOutputHandler().PrintError("Pull failed: %v", err)
-			return
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runPullCommand(cmd, args)
 	},
 }
 
-// runPullCommand executes the configuration pull process for a specific directory
+const branchConfigErrorPrefix = "Branch Configuration Error"
+
+// handleBranchConfigError handles branch configuration errors with helpful context.
+func handleBranchConfigError(err error, cfg *config.AnvilConfig, stage string, output palantir.OutputHandler) error {
+	if !strings.Contains(err.Error(), branchConfigErrorPrefix) {
+		return err
+	}
+
+	fmt.Println("")
+	output.PrintError("%s", err.Error())
+	fmt.Println("")
+
+	if stage == "validate" {
+		output.PrintInfo("The repository exists but the configured branch is not available.")
+		output.PrintInfo("    You may need to:")
+		output.PrintInfo("    • Update the branch in your %s", constants.ANVIL_CONFIG_FILE)
+		output.PrintInfo("    • Or check the available branches in your repository")
+	} else {
+		output.PrintInfo("The repository exists but the configured branch is not available.")
+		output.PrintInfo("    You may need to:")
+		output.PrintInfo("    • Update the branch in your %s", constants.ANVIL_CONFIG_FILE)
+		output.PrintInfo("    • Or delete the local repository at: %s", cfg.GitHub.LocalPath)
+		output.PrintInfo("      (It will be re-cloned with the correct branch)")
+	}
+
+	return fmt.Errorf("%s failed due to branch configuration issue", stage)
+}
+
+// runPullCommand executes the configuration pull process for a specific directory.
 func runPullCommand(cmd *cobra.Command, args []string) error {
 	// Default to "anvil" if no argument provided
 	targetDir := constants.ANVIL
@@ -105,16 +132,8 @@ func runPullCommand(cmd *cobra.Command, args []string) error {
 	spinner.Start()
 	if err := githubClient.ValidateRepository(ctx); err != nil {
 		spinner.Error("Repository validation failed")
-		// Provide additional context for repository validation errors
-		if strings.Contains(err.Error(), "Branch Configuration Error") {
-			fmt.Println("")
-			output.PrintError("%s", err.Error())
-			fmt.Println("")
-			output.PrintInfo("The repository exists but the configured branch is not available.")
-			output.PrintInfo("    You may need to:")
-			output.PrintInfo("    • Update the branch in your %s", constants.ANVIL_CONFIG_FILE)
-			output.PrintInfo("    • Or check the available branches in your repository")
-			return fmt.Errorf("repository validation failed due to branch configuration issue")
+		if branchErr := handleBranchConfigError(err, cfg, "validate", output); branchErr != nil {
+			return branchErr
 		}
 		return fmt.Errorf("failed to validate repository: %w", err)
 	}
@@ -126,17 +145,8 @@ func runPullCommand(cmd *cobra.Command, args []string) error {
 	spinner.Start()
 	if err := githubClient.CloneRepository(ctx); err != nil {
 		spinner.Error("Clone failed")
-		// Provide additional context for clone errors
-		if strings.Contains(err.Error(), "Branch Configuration Error") {
-			fmt.Println("")
-			output.PrintError("%s", err.Error())
-			fmt.Println("")
-			output.PrintInfo("The repository exists but the configured branch is not available during clone.")
-			output.PrintInfo("    You may need to:")
-			output.PrintInfo("    • Update the branch in your %s", constants.ANVIL_CONFIG_FILE)
-			output.PrintInfo("    • Or delete the local repository at: %s", cfg.GitHub.LocalPath)
-			output.PrintInfo("      (It will be re-cloned with the correct branch)")
-			return fmt.Errorf("clone failed due to branch configuration issue")
+		if branchErr := handleBranchConfigError(err, cfg, "clone", output); branchErr != nil {
+			return branchErr
 		}
 		return fmt.Errorf("failed to clone repository: %w", err)
 	}
@@ -148,16 +158,8 @@ func runPullCommand(cmd *cobra.Command, args []string) error {
 	spinner.Start()
 	if err := githubClient.PullChanges(ctx); err != nil {
 		spinner.Error("Pull failed")
-		// Provide additional context for branch configuration errors during pull
-		if strings.Contains(err.Error(), "Branch Configuration Error") {
-			output.PrintError("%s", err.Error())
-			fmt.Println("")
-			output.PrintInfo("The local repository exists but the configured branch is not available.")
-			output.PrintInfo("    You may need to:")
-			output.PrintInfo("    • Update the branch in your %s", constants.ANVIL_CONFIG_FILE)
-			output.PrintInfo("    • Or delete the local repository at: %s", cfg.GitHub.LocalPath)
-			output.PrintInfo("      (It will be re-cloned with the correct branch)")
-			return fmt.Errorf("pull failed due to branch configuration issue")
+		if branchErr := handleBranchConfigError(err, cfg, "pull", output); branchErr != nil {
+			return branchErr
 		}
 		return fmt.Errorf("failed to pull changes: %w", err)
 	}
@@ -178,6 +180,7 @@ func runPullCommand(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// displaySuccessMessage displays a success message after the pull operation.
 func displaySuccessMessage(targetDir, tempDir string, cfg *config.AnvilConfig) {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader("Pull Complete!")
@@ -192,7 +195,7 @@ func displaySuccessMessage(targetDir, tempDir string, cfg *config.AnvilConfig) {
 	}
 }
 
-// validateGitHubConfig validates that GitHub configuration is properly set up
+// validateGitHubConfig validates that GitHub configuration is properly set up.
 func validateGitHubConfig(cfg *config.AnvilConfig) error {
 	if cfg.GitHub.ConfigRepo == "" {
 		return errors.NewConfigurationError(constants.OpPull, "validate-config",
@@ -235,7 +238,7 @@ Example:
 	return nil
 }
 
-// copyDirectoryToTemp copies a specific directory from the repo to a temporary location
+// copyDirectoryToTemp copies a specific directory from the repo to a temporary location.
 func copyDirectoryToTemp(cfg *config.AnvilConfig, targetDir string) (string, error) {
 	// Source directory in the cloned repo
 	sourceDir := filepath.Join(cfg.GitHub.LocalPath, targetDir)
@@ -268,7 +271,7 @@ func copyDirectoryToTemp(cfg *config.AnvilConfig, targetDir string) (string, err
 	return destDir, nil
 }
 
-// listCopiedFiles lists the files that were copied to the temp directory
+// listCopiedFiles lists the files that were copied to the temp directory.
 func listCopiedFiles(tempDir string) error {
 	fmt.Println("")
 	palantir.GetGlobalOutputHandler().PrintInfo("Copied files:")

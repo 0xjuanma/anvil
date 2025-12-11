@@ -204,6 +204,34 @@ func setupAuthentication(anvilConfig *config.AnvilConfig) (*github.GitHubClient,
 	return githubClient, nil
 }
 
+// executeCommonPushStages executes the common stages shared between pushAppConfig and pushAnvilConfig.
+// Returns githubClient, diffSummary, and error. If user cancels, returns nil diffSummary.
+func executeCommonPushStages(anvilConfig *config.AnvilConfig, appName, configPath string, ctx context.Context) (*github.GitHubClient, *github.DiffSummary, error) {
+	output := palantir.GetGlobalOutputHandler()
+
+	// Security warning
+	showSecurityWarning(anvilConfig.GitHub.ConfigRepo)
+
+	// Authentication setup
+	githubClient, err := setupAuthentication(anvilConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Prepare and show diff
+	diffSummary, err := prepareDiffPreview(githubClient, appName, configPath, ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// User confirmation
+	if !handleUserConfirmation(output, appName, githubClient, ctx) {
+		return nil, nil, nil
+	}
+
+	return githubClient, diffSummary, nil
+}
+
 // prepareDiffPreview prepares and shows the diff preview.
 func prepareDiffPreview(githubClient *github.GitHubClient, appName, configPath string, ctx context.Context) (*github.DiffSummary, error) {
 	output := palantir.GetGlobalOutputHandler()

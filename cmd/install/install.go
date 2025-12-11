@@ -23,6 +23,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/0xjuanma/anvil/internal/brew"
 	"github.com/0xjuanma/anvil/internal/config"
@@ -290,13 +291,13 @@ func printInstallDashboard(groupName string, statuses []toolStatus, current, tot
 		var statusText string
 		switch status.status {
 		case toolStatusDone:
-			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Installed")
+			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, constants.StatusInstalled)
 		case toolStatusFailed:
-			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Failed")
+			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, constants.StatusFailed)
 		case toolStatusInstalling:
-			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Installing...")
+			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, constants.StatusInstalling)
 		default:
-			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Pending")
+			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, constants.StatusPending)
 		}
 
 		content.WriteString(fmt.Sprintf("  [%d/%d] %s\n", i+1, total, statusText))

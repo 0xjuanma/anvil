@@ -166,7 +166,7 @@ func setupPullAuthentication(cfg *config.AnvilConfig) (*github.GitHubClient, con
 func validatePullRepository(ctx context.Context, githubClient *github.GitHubClient, cfg *config.AnvilConfig) error {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Stage 2: Validating repository access...")
-	spinner := charm.NewCircleSpinner("Validating repository access and branch configuration")
+	spinner := charm.NewCircleSpinner(constants.SpinnerValidatingRepository)
 	spinner.Start()
 	if err := githubClient.ValidateRepository(ctx); err != nil {
 		spinner.Error("Repository validation failed")
@@ -183,7 +183,7 @@ func validatePullRepository(ctx context.Context, githubClient *github.GitHubClie
 func ensurePullRepository(ctx context.Context, githubClient *github.GitHubClient, cfg *config.AnvilConfig) error {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Stage 3: Cloning or updating repository...")
-	spinner := charm.NewDotsSpinner("Cloning or updating repository")
+	spinner := charm.NewDotsSpinner(constants.SpinnerCloningRepository)
 	spinner.Start()
 	if err := githubClient.CloneRepository(ctx); err != nil {
 		spinner.Error("Clone failed")
@@ -200,7 +200,7 @@ func ensurePullRepository(ctx context.Context, githubClient *github.GitHubClient
 func pullLatestChanges(ctx context.Context, githubClient *github.GitHubClient, cfg *config.AnvilConfig) error {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Stage 4: Pulling latest changes...")
-	spinner := charm.NewDotsSpinner("Pulling latest changes")
+	spinner := charm.NewDotsSpinner(constants.SpinnerPullingChanges)
 	spinner.Start()
 	if err := githubClient.PullChanges(ctx); err != nil {
 		spinner.Error("Pull failed")

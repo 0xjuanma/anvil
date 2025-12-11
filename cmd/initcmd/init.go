@@ -43,45 +43,85 @@ var InitCmd = &cobra.Command{
 
 // runInitCommand executes the complete initialization process for Anvil CLI environment.
 func runInitCommand(cmd *cobra.Command) error {
-	// Display initialization banner
+	displayInitBanner()
+
+	if err := validateAndInstallInitTools(); err != nil {
+		return err
+	}
+
+	if err := createInitDirectories(); err != nil {
+		return err
+	}
+
+	if err := generateInitSettings(); err != nil {
+		return err
+	}
+
+	warnings := checkInitEnvironment()
+
+	discoverFlag, _ := cmd.Flags().GetBool("discover")
+	if discoverFlag {
+		if err := runInitDiscovery(); err != nil {
+			return err
+		}
+	}
+
+	return displayInitCompletion(warnings)
+}
+
+// displayInitBanner displays the initialization banner.
+func displayInitBanner() {
 	fmt.Println(charm.RenderBox("🔨 ANVIL INITIALIZATION", "", "#00D9FF", true))
 	fmt.Println()
+}
 
+// validateAndInstallInitTools validates and installs required tools.
+func validateAndInstallInitTools() error {
 	o := palantir.GetGlobalOutputHandler()
-
-	// Stage 1: Tool validation and installation
 	o.PrintStage("Stage 1: Tool Validation")
-	spinner := charm.NewCircleSpinner("Validating and installing required tools")
+	spinner := charm.NewCircleSpinner(constants.SpinnerValidatingTools)
 	spinner.Start()
 	if err := tools.ValidateAndInstallTools(); err != nil {
 		spinner.Error("Tool validation failed")
 		return errors.NewValidationError(constants.OpInit, "validate-tools", err)
 	}
 	spinner.Success("All required tools are available")
+	return nil
+}
 
-	// Stage 2: Create necessary directories
+// createInitDirectories creates necessary directories.
+func createInitDirectories() error {
+	o := palantir.GetGlobalOutputHandler()
 	o.PrintStage("Stage 2: Directory Creation")
-	spinner = charm.NewDotsSpinner("Creating necessary directories")
+	spinner := charm.NewDotsSpinner(constants.SpinnerCreatingDirectories)
 	spinner.Start()
 	if err := config.CreateDirectories(); err != nil {
 		spinner.Error("Failed to create directories")
 		return errors.NewFileSystemError(constants.OpInit, "create-directories", err)
 	}
 	spinner.Success("Directories created successfully")
+	return nil
+}
 
-	// Stage 3: Generate default settings.yaml
+// generateInitSettings generates default settings.yaml.
+func generateInitSettings() error {
+	o := palantir.GetGlobalOutputHandler()
 	o.PrintStage("Stage 3: Settings Generation")
-	spinner = charm.NewDotsSpinner(fmt.Sprintf("Generating default %s", constants.ANVIL_CONFIG_FILE))
+	spinner := charm.NewDotsSpinner(fmt.Sprintf("Generating default %s", constants.ANVIL_CONFIG_FILE))
 	spinner.Start()
 	if err := config.GenerateDefaultSettings(); err != nil {
 		spinner.Error("Failed to generate settings")
 		return errors.NewConfigurationError(constants.OpInit, "generate-settings", err)
 	}
 	spinner.Success(fmt.Sprintf("Default %s generated", constants.ANVIL_CONFIG_FILE))
+	return nil
+}
 
-	// Stage 4: Check local environment configurations
+// checkInitEnvironment checks local environment configurations.
+func checkInitEnvironment() []string {
+	o := palantir.GetGlobalOutputHandler()
 	o.PrintStage("Stage 4: Environment Check")
-	spinner = charm.NewDotsSpinner("Checking local environment configurations")
+	spinner := charm.NewDotsSpinner(constants.SpinnerCheckingEnvironment)
 	spinner.Start()
 	warnings := config.CheckEnvironmentConfigurations()
 	if len(warnings) > 0 {
@@ -92,25 +132,30 @@ func runInitCommand(cmd *cobra.Command) error {
 	} else {
 		spinner.Success("Environment configurations are properly set")
 	}
-	// Stage 5: Run the discovery logic only if the --discover flag is provided
-	discoverFlag, _ := cmd.Flags().GetBool("discover")
-	if discoverFlag {
-		o.PrintStage("Stage 5: App Discovery Logic")
-		spinner = charm.NewDotsSpinner("Running discovery logic")
-		spinner.Start()
-		if err := config.RunDiscoverLogic(); err != nil {
-			spinner.Error("Failed to run app discovery logic")
-			return errors.NewConfigurationError(constants.OpInit, "run-discover-logic", err)
-		}
-		spinner.Success("App discovery logic completed")
-	}
+	return warnings
+}
 
-	// Stage 6: Print completion message and next steps
+// runInitDiscovery runs the app discovery logic.
+func runInitDiscovery() error {
+	o := palantir.GetGlobalOutputHandler()
+	o.PrintStage("Stage 5: App Discovery Logic")
+	spinner := charm.NewDotsSpinner(constants.SpinnerRunningDiscovery)
+	spinner.Start()
+	if err := config.RunDiscoverLogic(); err != nil {
+		spinner.Error("Failed to run app discovery logic")
+		return errors.NewConfigurationError(constants.OpInit, "run-discover-logic", err)
+	}
+	spinner.Success("App discovery logic completed")
+	return nil
+}
+
+// displayInitCompletion displays completion message and next steps.
+func displayInitCompletion(warnings []string) error {
+	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader("Initialization Complete!")
 	o.PrintInfo("Anvil has been successfully initialized and is ready to use.")
 	o.PrintInfo("Configuration files have been created in: %s", config.GetAnvilConfigPath())
 
-	// Provide specific guidance if there are configuration warnings
 	if len(warnings) > 0 {
 		fmt.Println("")
 		o.PrintInfo("Recommended next steps to complete your setup:")
@@ -121,21 +166,18 @@ func runInitCommand(cmd *cobra.Command) error {
 		o.PrintInfo("These steps are optional but recommended for the best experience.")
 	}
 
-	// Final usage guidance
 	fmt.Println("")
 	o.PrintInfo("You can now use:")
 	o.PrintInfo("  • 'anvil install [group]' to install development tool groups")
 	o.PrintInfo("  • 'anvil install [app]' to install any individual application")
 	o.PrintInfo("  • Edit %s/%s to customize your configuration", config.GetAnvilConfigDirectory(), constants.ANVIL_CONFIG_FILE)
 
-	// GitHub configuration warning
 	o.PrintWarning("Configuration Management Setup Required:")
 	o.PrintInfo("  • Edit the 'github.config_repo' field in %s to enable config pull/push", constants.ANVIL_CONFIG_FILE)
 	o.PrintInfo("  • Example: 'github.config_repo: username/dotfiles'")
 	o.PrintInfo("  • Set GITHUB_TOKEN environment variable for authentication")
 	o.PrintInfo("  • Run 'anvil doctor' once added to validate configuration")
 
-	// Show available groups dynamically
 	if groups, err := config.GetAvailableGroups(); err == nil {
 		builtInGroups := config.GetBuiltInGroups()
 		fmt.Println("")

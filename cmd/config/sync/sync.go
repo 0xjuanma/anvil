@@ -81,7 +81,7 @@ func syncAnvilSettings(dryRun bool) error {
 		o.PrintInfo("🔧 To fix this:")
 		o.PrintInfo("   • Run 'anvil config pull anvil' to download settings")
 		o.PrintInfo("   • Ensure your repository has an 'anvil' directory with settings.yaml")
-		return fmt.Errorf("config not pulled yet")
+		return fmt.Errorf(constants.ErrConfigNotPulled)
 	}
 
 	currentSettingsPath := config.GetAnvilConfigPath()
@@ -99,8 +99,8 @@ func syncAnvilSettings(dryRun bool) error {
 		SourcePath:     tempSettingsPath,
 		DestPath:       currentSettingsPath,
 		ConfirmMsg:     fmt.Sprintf("Sync local %s? Old copy will be archived.", constants.ANVIL_CONFIG_FILE),
-		SpinnerMsg:     "Syncing anvil settings",
-		SpinnerSuccess: "[Anvil] settings synced successfully",
+		SpinnerMsg:     constants.SpinnerSyncingAnvilSettings,
+		SpinnerSuccess: fmt.Sprintf("[Anvil] %s", constants.StatusSettingsSynced),
 		SuccessMsg:     "Sync done!",
 	}
 	return performSync(opts)
@@ -123,11 +123,11 @@ func syncAppConfig(appName string, dryRun bool) error {
 		output.PrintInfo("🔧 To fix this:")
 		output.PrintInfo("   • Run 'anvil config pull %s' to download configuration", appName)
 		output.PrintInfo("   • Ensure your repository has a '%s' directory", appName)
-		return fmt.Errorf("config not pulled yet")
+		return fmt.Errorf(constants.ErrConfigNotPulled)
 	}
 
 	if cfg.Configs == nil {
-		return fmt.Errorf("no configs section found in %s", constants.ANVIL_CONFIG_FILE)
+		return fmt.Errorf(constants.ErrNoConfigsSection, constants.ANVIL_CONFIG_FILE)
 	}
 
 	localConfigPath, exists := cfg.Configs[appName]
@@ -142,7 +142,7 @@ func syncAppConfig(appName string, dryRun bool) error {
 		output.PrintInfo("Example paths:")
 		output.PrintInfo("  • ~/.config/%s", appName)
 		output.PrintInfo("  • ~/Library/Application Support/%s", strings.Title(appName))
-		return fmt.Errorf("app config path not defined")
+		return fmt.Errorf(constants.ErrAppConfigNotDefined)
 	}
 
 	output.PrintInfo("Source: %s", tempAppPath)
@@ -159,7 +159,7 @@ func syncAppConfig(appName string, dryRun bool) error {
 		DestPath:       localConfigPath,
 		ConfirmMsg:     fmt.Sprintf("Sync %s configs? Old copy will be archived.", appName),
 		SpinnerMsg:     fmt.Sprintf("Syncing %s configuration", appName),
-		SpinnerSuccess: fmt.Sprintf("[%s] configuration synced successfully", strings.Title(appName)),
+		SpinnerSuccess: fmt.Sprintf("[%s] %s", strings.Title(appName), constants.StatusConfigurationSynced),
 		SuccessMsg:     "Sync done!",
 	}
 	return performSync(opts)

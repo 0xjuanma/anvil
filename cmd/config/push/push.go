@@ -236,14 +236,14 @@ func handleUserConfirmation(output palantir.OutputHandler, appName string, githu
 }
 
 // performPushOperation executes the actual push operation.
-func performPushOperation(githubClient *github.GitHubClient, appName, configPath string, diffSummary *github.DiffSummary, anvilConfig *config.AnvilConfig, ctx context.Context) error {
+func performPushOperation(ctx context.Context, opts PushOperationOptions) error {
 	output := palantir.GetGlobalOutputHandler()
-	output.PrintStage(fmt.Sprintf("Pushing %s configuration to repository...", appName))
+	output.PrintStage(fmt.Sprintf("Pushing %s configuration to repository...", opts.AppName))
 
-	result, err := githubClient.PushAppConfig(ctx, appName, configPath)
+	result, err := opts.GitHubClient.PushAppConfig(ctx, opts.AppName, opts.ConfigPath)
 	if err != nil {
 		// Clean up any staged changes in case of error
-		if cleanupErr := githubClient.CleanupStagedChanges(ctx); cleanupErr != nil {
+		if cleanupErr := opts.GitHubClient.CleanupStagedChanges(ctx); cleanupErr != nil {
 			output.PrintWarning("Failed to cleanup staged changes after error: %v", cleanupErr)
 		}
 		return errors.NewInstallationError(constants.OpPush, "push-app-config", err)
@@ -255,7 +255,7 @@ func performPushOperation(githubClient *github.GitHubClient, appName, configPath
 		return nil
 	}
 
-	displaySuccessMessage(appName, result, diffSummary, anvilConfig)
+	displaySuccessMessage(opts.AppName, result, opts.DiffSummary, opts.AnvilConfig)
 	return nil
 }
 

@@ -25,7 +25,7 @@ import (
 	"github.com/0xjuanma/palantir"
 )
 
-// displayCleanPreview shows what will be cleaned
+// displayCleanPreview shows what will be cleaned.
 func displayCleanPreview(output palantir.OutputHandler, itemsToClean []string) {
 	output.PrintInfo("Found %d root directories to clean:", len(itemsToClean))
 	output.PrintInfo("Directory structure to be cleaned:")
@@ -44,7 +44,7 @@ func displayCleanPreview(output palantir.OutputHandler, itemsToClean []string) {
 	}
 }
 
-// handleUserConfirmation handles user confirmation and returns true if should proceed
+// handleUserConfirmation handles user confirmation and returns true if should proceed.
 func handleUserConfirmation(output palantir.OutputHandler, force, dryRun bool, itemCount int) bool {
 	// Confirm deletion unless force flag is used
 	if !force && !dryRun {
@@ -57,7 +57,7 @@ func handleUserConfirmation(output palantir.OutputHandler, force, dryRun bool, i
 	return true
 }
 
-// displayCleanResult shows the result of cleaning a specific item
+// displayCleanResult shows the result of cleaning a specific item.
 func displayCleanResult(output palantir.OutputHandler, itemPath string) {
 	itemName := filepath.Base(itemPath)
 	if info, err := os.Stat(itemPath); err == nil && info.IsDir() {
@@ -71,7 +71,7 @@ func displayCleanResult(output palantir.OutputHandler, itemPath string) {
 	}
 }
 
-// buildDirectoryTree builds a simple tree showing only immediate contents of a directory
+// buildDirectoryTree builds a simple tree showing only immediate contents of a directory.
 func buildDirectoryTree(dirPath, dirName string) (int, string) {
 	var output strings.Builder
 	var count int

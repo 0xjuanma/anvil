@@ -33,6 +33,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// SyncOptions contains options for performing a sync operation.
+type SyncOptions struct {
+	ArchivePrefix  string
+	SourcePath     string
+	DestPath       string
+	ConfirmMsg     string
+	SpinnerMsg     string
+	SpinnerSuccess string
+	SuccessMsg     string
+}
+
 var SyncCmd = &cobra.Command{
 	Use:   "sync [app-name]",
 	Short: "Sync pulled configuration files to their local destinations",

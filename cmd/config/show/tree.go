@@ -28,7 +28,7 @@ import (
 	"github.com/0xjuanma/palantir"
 )
 
-// TreeNode represents a node in the file tree
+// TreeNode represents a node in the file tree.
 type TreeNode struct {
 	Name     string
 	Path     string
@@ -36,7 +36,7 @@ type TreeNode struct {
 	Children []*TreeNode
 }
 
-// showDirectoryTree displays a tree structure of files/directories
+// showDirectoryTree displays a tree structure of files/directories.
 func showDirectoryTree(basePath, targetDir string) error {
 	// Build the tree structure
 	root, err := buildTree(basePath)
@@ -68,7 +68,7 @@ func showDirectoryTree(basePath, targetDir string) error {
 	return nil
 }
 
-// buildTree recursively builds a tree structure from the filesystem
+// buildTree recursively builds a tree structure from the filesystem.
 func buildTree(dirPath string) (*TreeNode, error) {
 	root := &TreeNode{
 		Name:     filepath.Base(dirPath),
@@ -137,7 +137,7 @@ func buildTree(dirPath string) (*TreeNode, error) {
 	return root, err
 }
 
-// sortChildren recursively sorts all children in the tree (directories first, then files, both alphabetically)
+// sortChildren recursively sorts all children in the tree (directories first, then files, both alphabetically).
 func sortChildren(node *TreeNode) {
 	if node.Children == nil {
 		return
@@ -157,7 +157,7 @@ func sortChildren(node *TreeNode) {
 	}
 }
 
-// printTreeNode prints a tree node with ASCII art and colors
+// printTreeNode prints a tree node with ASCII art and colors.
 func printTreeNode(node *TreeNode, prefix string, isLast bool, isRoot bool) {
 	if !isRoot {
 		// Choose the appropriate tree character

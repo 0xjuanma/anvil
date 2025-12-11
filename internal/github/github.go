@@ -268,12 +268,14 @@ func BuildAuthenticatedURL(repoURL, token, sshKeyPath string) string {
 	return repoURL
 }
 
-// getCloneURL returns the appropriate clone URL based on available authentication
+// getCloneURL returns the appropriate clone URL based on available authentication.
+// Uses BuildAuthenticatedURL with the client's configuration.
 func (gc *GitHubClient) getCloneURL() string {
 	return BuildAuthenticatedURL(gc.RepoURL, gc.Token, gc.SSHKeyPath)
 }
 
-// configureGitUser configures git user for the repository
+// configureGitUser configures git user for the repository.
+// Sets user.name and user.email if provided in the client configuration.
 func (gc *GitHubClient) configureGitUser(ctx context.Context) error {
 	if gc.Username != "" {
 		if _, err := system.RunCommandWithTimeout(ctx, constants.GitCommand, "config", "user.name", gc.Username); err != nil {
@@ -310,7 +312,8 @@ func (gc *GitHubClient) RepositoryStatus(ctx context.Context) (string, error) {
 	return result.Output, nil
 }
 
-// isValidGitRepository checks if the local path contains a valid git repository
+// isValidGitRepository checks if the local path contains a valid git repository.
+// Verifies .git directory exists and git commands work in that directory.
 func (gc *GitHubClient) isValidGitRepository() bool {
 	// Check if directory exists
 	if _, err := os.Stat(gc.LocalPath); os.IsNotExist(err) {

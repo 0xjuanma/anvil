@@ -25,7 +25,8 @@ import (
 	"github.com/0xjuanma/anvil/internal/utils"
 )
 
-// runCommandWithSpinner executes a system command with spinner feedback
+// runCommandWithSpinner executes a system command with spinner feedback.
+// Shows spinner during execution and updates with success/error status.
 func runCommandWithSpinner(spinnerMsg, errorMsg string, command string, args ...string) error {
 	spinner := charm.NewDotsSpinner(spinnerMsg)
 	spinner.Start()
@@ -43,7 +44,8 @@ func runCommandWithSpinner(spinnerMsg, errorMsg string, command string, args ...
 	return nil
 }
 
-// ensureApplicationsDirectory ensures the Applications directory exists and returns its path
+// ensureApplicationsDirectory ensures the Applications directory exists and returns its path.
+// Creates the directory if it doesn't exist.
 func ensureApplicationsDirectory() (string, error) {
 	homeDir, _ := system.HomeDir()
 	applicationsDir := filepath.Join(homeDir, "Applications")

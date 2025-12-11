@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package install provides functionality for installing development tools
+// and applications dynamically via Homebrew, supporting both individual
+// and group-based installation with serial or concurrent execution.
 package install
 
 import (
@@ -34,7 +37,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// InstallCmd represents the install command
+// InstallCmd represents the install command.
 var InstallCmd = &cobra.Command{
 	Use:   "install [group-name|app-name] [--group-name group]",
 	Short: "Install development tools and applications dynamically via Homebrew",
@@ -49,7 +52,7 @@ var InstallCmd = &cobra.Command{
 		// Otherwise, require exactly one argument
 		return cobra.ExactArgs(1)(cmd, args)
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// Check for tree or list flag
 		treeFlag, _ := cmd.Flags().GetBool("tree")
 		listFlag, _ := cmd.Flags().GetBool("list")
@@ -66,10 +69,10 @@ var InstallCmd = &cobra.Command{
 			var content string
 			var title = "Available Applications"
 			if treeFlag {
-				content = renderTreeView(groups, builtInGroupNames, customGroupNames, installedApps)
+				content = utils.RenderTreeView(groups, builtInGroupNames, customGroupNames, installedApps)
 				title = fmt.Sprintf("%s (Tree View)", title)
 			} else {
-				content = renderListView(groups, builtInGroupNames, customGroupNames, installedApps)
+				content = utils.RenderListView(groups, builtInGroupNames, customGroupNames, installedApps)
 				title = fmt.Sprintf("%s (List View)", title)
 			}
 
@@ -78,14 +81,14 @@ var InstallCmd = &cobra.Command{
 			return
 		}
 
-		if err := runInstallCommand(cmd, args[0]); err != nil {
-			palantir.GetGlobalOutputHandler().PrintError("Install failed: %v", err)
-			return
+		if len(args) == 0 {
+			return nil
 		}
+		return runInstallCommand(cmd, args[0])
 	},
 }
 
-// runInstallCommand executes the dynamic install process
+// runInstallCommand executes the dynamic install process.
 func runInstallCommand(cmd *cobra.Command, target string) error {
 	o := palantir.GetGlobalOutputHandler()
 
@@ -114,7 +117,7 @@ func runInstallCommand(cmd *cobra.Command, target string) error {
 	return installIndividualApp(target, dryRun, cmd)
 }
 
-// installGroup installs all tools in a group
+// installGroup installs all tools in a group.
 func installGroup(groupName string, tools []string, dryRun bool, concurrent bool, maxWorkers int, timeout time.Duration) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader(fmt.Sprintf("Installing '%s' group", groupName))
@@ -141,7 +144,7 @@ func installGroup(groupName string, tools []string, dryRun bool, concurrent bool
 	return installGroupSerial(groupName, tools, dryRun)
 }
 
-// deduplicateGroupTools removes duplicate tools within a group and updates the settings file
+// deduplicateGroupTools removes duplicate tools within a group and updates the settings file.
 func deduplicateGroupTools(groupName string, tools []string) ([]string, error) {
 	seen := make(map[string]struct{}, len(tools))
 	deduplicatedTools := make([]string, 0, len(tools))
@@ -175,7 +178,7 @@ func deduplicateGroupTools(groupName string, tools []string) ([]string, error) {
 	return deduplicatedTools, nil
 }
 
-// installGroupConcurrent installs tools concurrently
+// installGroupConcurrent installs tools concurrently.
 func installGroupConcurrent(groupName string, tools []string, dryRun bool, maxWorkers int, timeout time.Duration) error {
 	o := palantir.GetGlobalOutputHandler()
 
@@ -200,14 +203,21 @@ func installGroupConcurrent(groupName string, tools []string, dryRun bool, maxWo
 	return err
 }
 
-// toolStatus represents the status of a tool installation
+// toolStatus represents the status of a tool installation.
 type toolStatus struct {
 	name   string
-	status string // "pending", "installing", "done", "failed"
+	status string // pending, installing, done, failed
 	emoji  string
 }
 
-// installGroupSerial installs tools serially using unified installation logic
+const (
+	toolStatusPending   = "pending"
+	toolStatusInstalling = "installing"
+	toolStatusDone      = "done"
+	toolStatusFailed    = "failed"
+)
+
+// installGroupSerial installs tools serially using unified installation logic.
 func installGroupSerial(groupName string, tools []string, dryRun bool) error {
 	o := palantir.GetGlobalOutputHandler()
 
@@ -219,14 +229,14 @@ func installGroupSerial(groupName string, tools []string, dryRun bool) error {
 	for i, tool := range tools {
 		toolStatuses[i] = toolStatus{
 			name:   tool,
-			status: "pending",
+			status: toolStatusPending,
 			emoji:  "⋯",
 		}
 	}
 
 	for i, tool := range tools {
 		// Update status to installing
-		toolStatuses[i].status = "installing"
+		toolStatuses[i].status = toolStatusInstalling
 		toolStatuses[i].emoji = "⠋"
 
 		// Print dashboard
@@ -236,13 +246,13 @@ func installGroupSerial(groupName string, tools []string, dryRun bool) error {
 		_, err := installSingleToolUnified(tool, dryRun)
 
 		if err != nil {
-			toolStatuses[i].status = "failed"
+			toolStatuses[i].status = toolStatusFailed
 			toolStatuses[i].emoji = "✗"
 			errorMsg := fmt.Sprintf("%s: %v", tool, err)
 			installErrors = append(installErrors, errorMsg)
 			o.PrintError("%s: %v", tool, err)
 		} else {
-			toolStatuses[i].status = "done"
+			toolStatuses[i].status = toolStatusDone
 			toolStatuses[i].emoji = "✓"
 			successCount++
 		}
@@ -254,24 +264,24 @@ func installGroupSerial(groupName string, tools []string, dryRun bool) error {
 	return reportGroupInstallationResults(groupName, successCount, len(tools), installErrors)
 }
 
-// printInstallDashboard displays the current installation progress
+// printInstallDashboard displays the current installation progress.
 func printInstallDashboard(groupName string, statuses []toolStatus, current, total int) {
 	var content strings.Builder
 	content.WriteString("\n")
 
 	// Show each tool with its status
-	for i, status := range statuses {
-		var statusText string
-		switch status.status {
-		case "done":
-			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Installed")
-		case "failed":
-			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Failed")
-		case "installing":
-			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Installing...")
-		default:
-			statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Pending")
-		}
+		for i, status := range statuses {
+			var statusText string
+			switch status.status {
+			case toolStatusDone:
+				statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Installed")
+			case toolStatusFailed:
+				statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Failed")
+			case toolStatusInstalling:
+				statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Installing...")
+			default:
+				statusText = fmt.Sprintf("%-20s %s %-15s", status.name, status.emoji, "Pending")
+			}
 
 		content.WriteString(fmt.Sprintf("  [%d/%d] %s\n", i+1, total, statusText))
 	}
@@ -291,7 +301,7 @@ func printInstallDashboard(groupName string, statuses []toolStatus, current, tot
 	fmt.Println(charm.RenderBox(fmt.Sprintf("Installing '%s' group (%d tools)", groupName, total), content.String(), "#00D9FF", false))
 }
 
-// installIndividualApp installs a single application using unified installation logic
+// installIndividualApp installs a single application using unified installation logic.
 func installIndividualApp(appName string, dryRun bool, cmd *cobra.Command) error {
 	o := palantir.GetGlobalOutputHandler()
 	o.PrintHeader(fmt.Sprintf("Installing '%s'", appName))
@@ -330,7 +340,7 @@ func installIndividualApp(appName string, dryRun bool, cmd *cobra.Command) error
 	return nil
 }
 
-// installSingleTool installs a single tool, handling special cases dynamically
+// installSingleTool installs a single tool, handling special cases dynamically.
 func installSingleTool(toolName string) error {
 	o := palantir.GetGlobalOutputHandler()
 
@@ -368,8 +378,7 @@ func installSingleTool(toolName string) error {
 	return nil
 }
 
-// installSingleToolUnified provides unified installation logic for all installation modes
-// This is the core function that ensures consistent behavior across individual, serial, and concurrent installations
+// installSingleToolUnified provides unified installation logic for all installation modes.
 func installSingleToolUnified(toolName string, dryRun bool) (wasNewlyInstalled bool, err error) {
 	o := palantir.GetGlobalOutputHandler()
 
@@ -394,7 +403,7 @@ func installSingleToolUnified(toolName string, dryRun bool) (wasNewlyInstalled b
 	return true, nil
 }
 
-// trackAppInSettings handles adding newly installed apps to settings
+// trackAppInSettings handles adding newly installed apps to settings.
 func trackAppInSettings(appName string) error {
 	o := palantir.GetGlobalOutputHandler()
 	// Check if already tracked to avoid duplicates
@@ -418,7 +427,7 @@ func trackAppInSettings(appName string) error {
 	return nil
 }
 
-// reportGroupInstallationResults provides unified error reporting for group installations
+// reportGroupInstallationResults provides unified error reporting for group installations.
 func reportGroupInstallationResults(groupName string, successCount, totalCount int, installErrors []string) error {
 	// Print summary
 	o := palantir.GetGlobalOutputHandler()
@@ -437,16 +446,7 @@ func reportGroupInstallationResults(groupName string, successCount, totalCount i
 	return nil
 }
 
-// runPostInstallScript runs a post-install script for a tool
-func runPostInstallScript(script string) error {
-	// For now, just provide instructions to the user
-	o := palantir.GetGlobalOutputHandler()
-	o.PrintInfo("To complete installation, run:")
-	o.PrintInfo("  %s", script)
-	return nil
-}
-
-// checkToolConfiguration checks if a tool is properly configured
+// checkToolConfiguration checks if a tool is properly configured.
 func checkToolConfiguration(toolName string) error {
 	switch toolName {
 	case constants.PkgGit:
@@ -456,7 +456,7 @@ func checkToolConfiguration(toolName string) error {
 	}
 }
 
-// checkGitConfiguration checks if git is properly configured
+// checkGitConfiguration checks if git is properly configured.
 func checkGitConfiguration() error {
 	config, err := config.LoadConfig()
 	if err == nil && (config.Git.Username == "" || config.Git.Email == "") {
@@ -469,15 +469,6 @@ func checkGitConfiguration() error {
 	return nil
 }
 
-// renderListView renders applications in a flat list format
-func renderListView(groups map[string][]string, builtInGroupNames []string, customGroupNames []string, installedApps []string) string {
-	return utils.RenderListView(groups, builtInGroupNames, customGroupNames, installedApps)
-}
-
-// renderTreeView renders applications in a hierarchical tree format
-func renderTreeView(groups map[string][]string, builtInGroupNames []string, customGroupNames []string, installedApps []string) string {
-	return utils.RenderTreeView(groups, builtInGroupNames, customGroupNames, installedApps)
-}
 
 func init() {
 	// Add flags for additional functionality

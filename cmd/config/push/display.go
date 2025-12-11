@@ -26,7 +26,7 @@ import (
 	"github.com/0xjuanma/palantir"
 )
 
-// showNewAppInfo displays information about new app additions
+// showNewAppInfo displays information about new app additions.
 func showNewAppInfo(appName, configPath string) {
 	output := palantir.GetGlobalOutputHandler()
 	fmt.Println("")
@@ -38,7 +38,7 @@ func showNewAppInfo(appName, configPath string) {
 	output.PrintInfo("All configuration files will be committed to a new branch.")
 }
 
-// handleAppLocationError provides helpful error messages for app location resolution failures
+// handleAppLocationError provides helpful error messages for app location resolution failures.
 func handleAppLocationError(appName string, err error) error {
 	if strings.Contains(err.Error(), "not found in configs or temp directory") {
 		o := palantir.GetGlobalOutputHandler()
@@ -57,7 +57,7 @@ func handleAppLocationError(appName string, err error) error {
 	return fmt.Errorf("failed to resolve app location: %w", err)
 }
 
-// showSecurityWarning displays a security warning about private repositories
+// showSecurityWarning displays a security warning about private repositories.
 func showSecurityWarning(privateRepo string) {
 	// 🚨 SECURITY WARNING: Remind users about private repository requirement
 	o := palantir.GetGlobalOutputHandler()
@@ -69,7 +69,7 @@ func showSecurityWarning(privateRepo string) {
 	o.PrintInfo("   • Public repositories will be BLOCKED\n")
 }
 
-// displaySuccessMessage displays a success message after the push operation
+// displaySuccessMessage displays a success message after the push operation.
 func displaySuccessMessage(appName string, result *github.PushConfigResult, diffSummary *github.DiffSummary, anvilConfig *config.AnvilConfig) {
 	// Display full success message for actual push
 	o := palantir.GetGlobalOutputHandler()
@@ -84,7 +84,7 @@ func displaySuccessMessage(appName string, result *github.PushConfigResult, diff
 	o.PrintInfo("Direct link: %s/compare/%s...%s", result.RepositoryURL, anvilConfig.GitHub.Branch, result.BranchName)
 }
 
-// showDiffOutput displays diff information using Git's native output
+// showDiffOutput displays diff information using Git's native output.
 func showDiffOutput(diffSummary *github.DiffSummary) {
 	o := palantir.GetGlobalOutputHandler()
 	if diffSummary.TotalFiles == 0 {

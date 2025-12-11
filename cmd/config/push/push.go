@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package push provides functionality to push configuration files to
+// a GitHub repository with automated branch creation and diff preview.
 package push
 
 import (
@@ -34,15 +36,12 @@ var PushCmd = &cobra.Command{
 	Short: "Push configuration files to GitHub repository",
 	Long:  constants.PUSH_COMMAND_LONG_DESCRIPTION,
 	Args:  cobra.MaximumNArgs(1), // Accept 0 or 1 argument
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := runPushCommand(cmd, args); err != nil {
-			palantir.GetGlobalOutputHandler().PrintError("Push failed: %v", err)
-			return
-		}
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runPushCommand(cmd, args)
 	},
 }
 
-// isNewAppAddition checks if this is a new app that exists locally but not in remote
+// isNewAppAddition checks if this is a new app that exists locally but not in remote.
 func isNewAppAddition(appName string, anvilConfig *config.AnvilConfig) bool {
 	// Check if app exists in local configs but not in remote
 	if localPath, exists := anvilConfig.Configs[appName]; exists {
@@ -54,7 +53,7 @@ func isNewAppAddition(appName string, anvilConfig *config.AnvilConfig) bool {
 	return false
 }
 
-// runPushCommand executes the configuration push process
+// runPushCommand executes the configuration push process.
 func runPushCommand(cmd *cobra.Command, args []string) error {
 	// Option 2: App-specific config push
 	if len(args) > 0 {
@@ -66,7 +65,7 @@ func runPushCommand(cmd *cobra.Command, args []string) error {
 	return pushAnvilConfig()
 }
 
-// pushAppConfig pushes application-specific configuration to the repository
+// pushAppConfig pushes application-specific configuration to the repository.
 func pushAppConfig(appName string) error {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintHeader(fmt.Sprintf("Push '%s' Configuration", appName))
@@ -113,7 +112,7 @@ func pushAppConfig(appName string) error {
 	return performPushOperation(githubClient, appName, configPath, diffSummary, anvilConfig, ctx)
 }
 
-// loadAndValidateConfig loads and validates the anvil configuration
+// loadAndValidateConfig loads and validates the anvil configuration.
 func loadAndValidateConfig() (*config.AnvilConfig, error) {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Loading anvil configuration...")
@@ -133,7 +132,7 @@ func loadAndValidateConfig() (*config.AnvilConfig, error) {
 	return anvilConfig, nil
 }
 
-// resolveAppLocation resolves the app configuration location
+// resolveAppLocation resolves the app configuration location.
 func resolveAppLocation(appName string, anvilConfig *config.AnvilConfig) (string, error) {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Resolving app configuration location...")
@@ -170,7 +169,7 @@ func resolveAppLocation(appName string, anvilConfig *config.AnvilConfig) (string
 	return configPath, nil
 }
 
-// setupAuthentication sets up GitHub authentication
+// setupAuthentication sets up GitHub authentication.
 func setupAuthentication(anvilConfig *config.AnvilConfig) (*github.GitHubClient, error) {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage("Setting up authentication...")
@@ -200,7 +199,7 @@ func setupAuthentication(anvilConfig *config.AnvilConfig) (*github.GitHubClient,
 	return githubClient, nil
 }
 
-// prepareDiffPreview prepares and shows the diff preview
+// prepareDiffPreview prepares and shows the diff preview.
 func prepareDiffPreview(githubClient *github.GitHubClient, appName, configPath string, ctx context.Context) (*github.DiffSummary, error) {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage(fmt.Sprintf("Preparing to push %s configuration...", appName))
@@ -222,7 +221,7 @@ func prepareDiffPreview(githubClient *github.GitHubClient, appName, configPath s
 	return diffSummary, nil
 }
 
-// handleUserConfirmation handles user confirmation for the push operation
+// handleUserConfirmation handles user confirmation for the push operation.
 func handleUserConfirmation(output palantir.OutputHandler, appName string, githubClient *github.GitHubClient, ctx context.Context) bool {
 	output.PrintStage("Requesting user confirmation...")
 	if !output.Confirm(fmt.Sprintf("Do you want to push your %s configurations to the repository?", appName)) {
@@ -236,7 +235,7 @@ func handleUserConfirmation(output palantir.OutputHandler, appName string, githu
 	return true
 }
 
-// performPushOperation executes the actual push operation
+// performPushOperation executes the actual push operation.
 func performPushOperation(githubClient *github.GitHubClient, appName, configPath string, diffSummary *github.DiffSummary, anvilConfig *config.AnvilConfig, ctx context.Context) error {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintStage(fmt.Sprintf("Pushing %s configuration to repository...", appName))
@@ -260,7 +259,7 @@ func performPushOperation(githubClient *github.GitHubClient, appName, configPath
 	return nil
 }
 
-// pushAnvilConfig pushes the anvil settings.yaml to the repository
+// pushAnvilConfig pushes the anvil settings.yaml to the repository.
 func pushAnvilConfig() error {
 	output := palantir.GetGlobalOutputHandler()
 	output.PrintHeader("Push Anvil Configuration")
@@ -359,5 +358,3 @@ func pushAnvilConfig() error {
 	return nil
 }
 
-func init() {
-}

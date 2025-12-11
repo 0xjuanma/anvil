@@ -91,7 +91,7 @@ func runCleanCommand(cmd *cobra.Command, args []string) error {
 
 // getAnvilDirectoryPath returns the path to the .anvil directory.
 func getAnvilDirectoryPath() (string, error) {
-	homeDir, err := system.GetHomeDir()
+	homeDir, err := system.HomeDir()
 	if err != nil {
 		return "", &errors.AnvilError{
 			Op:      "clean",

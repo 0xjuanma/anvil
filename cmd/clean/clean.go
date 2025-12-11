@@ -185,7 +185,7 @@ func cleanItem(itemPath string) error {
 		itemName := filepath.Base(itemPath)
 
 		// Special handling for dotfiles directory - remove it completely
-		if itemName == "dotfiles" {
+		if itemName == constants.DOTFILES_DIR {
 			// Remove the entire dotfiles directory to ensure clean git repository state
 			if err := os.RemoveAll(itemPath); err != nil {
 				return fmt.Errorf("failed to remove dotfiles directory: %w", err)

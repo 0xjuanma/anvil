@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/0xjuanma/anvil/internal/constants"
 	"github.com/0xjuanma/palantir"
 )
 
@@ -61,7 +62,7 @@ func handleUserConfirmation(output palantir.OutputHandler, force, dryRun bool, i
 func displayCleanResult(output palantir.OutputHandler, itemPath string) {
 	itemName := filepath.Base(itemPath)
 	if info, err := os.Stat(itemPath); err == nil && info.IsDir() {
-		if itemName == "dotfiles" {
+		if itemName == constants.DOTFILES_DIR {
 			output.PrintSuccess("Removed dotfiles directory completely")
 		} else {
 			output.PrintSuccess("Cleaned contents of directory " + itemName)

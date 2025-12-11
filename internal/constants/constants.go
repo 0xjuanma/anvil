@@ -105,6 +105,7 @@ const (
 	ANVIL             = "anvil"
 	ANVIL_CONFIG_FILE = "settings.yaml"
 	ANVIL_CONFIG_DIR  = ".anvil"
+	DOTFILES_DIR      = "dotfiles"
 )
 
 // Common directory permissions

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Significant Package Refactor** - Complete package refactor and reorganization
 
 ### Fixed
+- **Source Installation** - Organize downloads/source installations by app name and detect successful extraction to prevent unnecessary brew fallback
 
 ## [2.7.0] - 2025-11-29
 

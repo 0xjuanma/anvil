@@ -66,8 +66,10 @@ func ensureLinuxApplicationsDirectory(appName string) (string, error) {
 }
 
 // ensureExtractDirectory creates and returns an extract directory path
+// Uses the same directory as the downloaded file (organized by app name)
 func ensureExtractDirectory(filePath, appName string) (string, error) {
-	extractDir := filepath.Join(filepath.Dir(filePath), appName+"-extracted")
+	// Extract to a subdirectory within the app's download directory
+	extractDir := filepath.Join(filepath.Dir(filePath), "extracted")
 	if err := utils.EnsureDirectory(extractDir); err != nil {
 		return "", fmt.Errorf("failed to create extract directory: %w", err)
 	}

@@ -25,22 +25,54 @@ import (
 	"github.com/0xjuanma/anvil/internal/utils"
 )
 
+// ExtractionSucceededError indicates that extraction succeeded but installation failed
+// This allows us to provide helpful feedback about where the app was extracted
+type ExtractionSucceededError struct {
+	ExtractDir string
+	AppName    string
+	Reason     string
+}
+
+func (e *ExtractionSucceededError) Error() string {
+	return fmt.Sprintf("extraction succeeded but installation failed: %s", e.Reason)
+}
+
 // handleExtractedContentsMacOS handles extracted contents on macOS
+// Returns ExtractionSucceededError if extraction succeeded but moving to Applications failed
 func handleExtractedContentsMacOS(extractDir, appName string) error {
 	appPath := findAppInDirectory(extractDir, appName)
 	if appPath == "" {
-		return fmt.Errorf("failed to find .app in extracted contents")
+		// Extraction succeeded but we can't find the .app
+		return &ExtractionSucceededError{
+			ExtractDir: extractDir,
+			AppName:    appName,
+			Reason:     "failed to find .app in extracted contents",
+		}
 	}
 
 	applicationsDir, err := ensureApplicationsDirectory()
 	if err != nil {
-		return err
+		// Extraction succeeded but we can't create Applications directory
+		return &ExtractionSucceededError{
+			ExtractDir: extractDir,
+			AppName:    appName,
+			Reason:     fmt.Sprintf("failed to create Applications directory: %v", err),
+		}
 	}
 
 	appNameFromPath := filepath.Base(appPath)
 	destPath := filepath.Join(applicationsDir, appNameFromPath)
 
-	return copyAppToApplications(appPath, destPath)
+	if err := copyAppToApplications(appPath, destPath); err != nil {
+		// Extraction succeeded but copying to Applications failed
+		return &ExtractionSucceededError{
+			ExtractDir: extractDir,
+			AppName:    appName,
+			Reason:     fmt.Sprintf("failed to copy application to Applications: %v", err),
+		}
+	}
+
+	return nil
 }
 
 // handleExtractedContentsLinux handles extracted contents on Linux

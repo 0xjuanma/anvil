@@ -246,7 +246,7 @@ func (ci *ConcurrentInstaller) installWithTimeout(ctx context.Context, tool stri
 // installSingleTool installs a single tool (similar to the original logic)
 func (ci *ConcurrentInstaller) installSingleTool(ctx context.Context, tool string, workerID int) error {
 	// Check if source is configured for this app (user explicitly configured it)
-		sourceURL, exists, sourceErr := SourceURL(tool)
+	sourceURL, exists, sourceErr := SourceURL(tool)
 	if sourceErr != nil {
 		ci.output.PrintWarning("Worker %d: Failed to check source URL for %s: %v", workerID, tool, sourceErr)
 		// Fall back to brew if we can't check source
@@ -257,6 +257,12 @@ func (ci *ConcurrentInstaller) installSingleTool(ctx context.Context, tool strin
 	if exists && sourceURL != "" {
 		ci.output.PrintInfo("Worker %d: Installing %s from configured source", workerID, tool)
 		if err := InstallFromSource(tool, sourceURL); err != nil {
+			// Check if extraction succeeded but installation failed
+			if _, ok := err.(*ExtractionSucceededError); ok {
+				// Extraction succeeded, don't fall back to brew
+				// User message already shown in InstallFromSource
+				return nil
+			}
 			// Source installation failed, fall back to brew
 			ci.output.PrintInfo("Worker %d: Source installation failed, falling back to brew for %s", workerID, tool)
 			return brew.InstallPackageDirectly(tool)

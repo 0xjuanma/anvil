@@ -55,7 +55,8 @@ func downloadFile(fileURL, appName string) (string, error) {
 	}
 
 	homeDir, _ := system.HomeDir()
-	downloadsDir := filepath.Join(homeDir, constants.DownloadsDirName, constants.AnvilDownloadsSubdir)
+	// Organize downloads by app name: ~/Downloads/anvil-downloads/{appName}/
+	downloadsDir := filepath.Join(homeDir, constants.DownloadsDirName, constants.AnvilDownloadsSubdir, appName)
 	if err := utils.EnsureDirectory(downloadsDir); err != nil {
 		return "", fmt.Errorf("failed to create downloads directory: %w", err)
 	}

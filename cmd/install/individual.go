@@ -83,6 +83,12 @@ func installSingleTool(toolName string) error {
 	if exists && sourceURL != "" {
 		o.PrintInfo("Installing %s from configured source", toolName)
 		if err := installer.InstallFromSource(toolName, sourceURL); err != nil {
+			// Check if extraction succeeded but installation failed
+			if _, ok := err.(*installer.ExtractionSucceededError); ok {
+				// Extraction succeeded, don't fall back to brew
+				// User message already shown in InstallFromSource
+				return nil
+			}
 			// Source installation failed, fall back to brew
 			o.PrintInfo("Source installation failed, falling back to brew for %s", toolName)
 			return brew.InstallPackageDirectly(toolName)

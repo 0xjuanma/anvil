@@ -146,7 +146,13 @@ func installZIP(filePath, appName string) error {
 	}
 
 	if system.IsMacOS() {
-		return handleExtractedContentsMacOS(extractDir, appName)
+		err := handleExtractedContentsMacOS(extractDir, appName)
+		// Check if extraction succeeded but installation failed
+		if extractErr, ok := err.(*ExtractionSucceededError); ok {
+			// Return the error but it will be handled gracefully by the caller
+			return extractErr
+		}
+		return err
 	}
 	return handleExtractedContentsLinux(extractDir, appName)
 }

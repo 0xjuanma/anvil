@@ -48,10 +48,20 @@ func installFromURL(appName, sourceURL string) error {
 	spinner = charm.NewDotsSpinner(fmt.Sprintf("Installing %s", appName))
 	spinner.Start()
 
-	if err := installDownloadedFile(downloadedFile, appName); err != nil {
-		spinner.Error(fmt.Sprintf("Failed to install %s", appName))
-		return fmt.Errorf("failed to install %s: %w", appName, err)
-	}
+		if err := installDownloadedFile(downloadedFile, appName); err != nil {
+			// Check if extraction succeeded but installation failed
+			if extractErr, ok := err.(*ExtractionSucceededError); ok {
+				spinner.Warning("Extraction succeeded, but automatic installation failed")
+				// Provide helpful feedback about where the app was extracted
+				fmt.Printf("\n✓ %s was successfully downloaded and extracted to:\n", appName)
+				fmt.Printf("  %s\n", extractErr.ExtractDir)
+				fmt.Printf("\nPlease manually move the application to your Applications folder.\n\n")
+				// Return error so caller can handle it appropriately (won't fall back to brew)
+				return extractErr
+			}
+			spinner.Error(fmt.Sprintf("Failed to install %s", appName))
+			return fmt.Errorf("failed to install %s: %w", appName, err)
+		}
 
 	spinner.Success(fmt.Sprintf("%s installed successfully", appName))
 	return nil

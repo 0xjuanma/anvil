@@ -36,9 +36,15 @@ Save hours in your process — install the tools you need, sync your configs, an
 
 ### Installation
 
-**New installations:**
+**Via install script (Recommended for fresh machines):**
 ```bash
 curl -sSL https://github.com/0xjuanma/anvil/releases/latest/download/install.sh | bash
+```
+*Note: Ideal for new machines without Homebrew - Anvil will install it during the `anvil init` step.*
+
+**Via Homebrew (If you already have Homebrew installed):**
+```bash
+brew install 0xjuanma/tap/anvil
 ```
 
 **Update existing installation:**

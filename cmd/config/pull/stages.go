@@ -29,6 +29,7 @@ import (
 	"github.com/0xjuanma/anvil/internal/terminal/charm"
 	"github.com/0xjuanma/palantir"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
 // setupPullCommand determines the target directory and loads configuration.
@@ -149,6 +150,59 @@ func copyPullDirectory(cfg *config.AnvilConfig, targetDir string) error {
 	}
 	spinner.Success("Configuration directory copied to temp location")
 
+	// Stage 6: Regenerate git config if pulling anvil settings
+	if targetDir == constants.ANVIL {
+		if err := regenerateGitConfigInPulledSettings(tempDir); err != nil {
+			output.PrintWarning("Could not regenerate git config: %v", err)
+			// Don't fail the operation, just warn
+		}
+	}
+
 	displaySuccessMessage(targetDir, tempDir, cfg)
+	return nil
+}
+
+// regenerateGitConfigInPulledSettings regenerates the git config section in pulled anvil settings.
+// This replaces any masked/placeholder values with the local system's git configuration.
+func regenerateGitConfigInPulledSettings(tempDir string) error {
+	output := palantir.GetGlobalOutputHandler()
+	output.PrintStage("Stage 6: Regenerating git config from system...")
+
+	// Path to the pulled settings.yaml
+	settingsPath := fmt.Sprintf("%s/%s", tempDir, constants.ANVIL_CONFIG_FILE)
+
+	// Load the pulled settings
+	data, err := os.ReadFile(settingsPath)
+	if err != nil {
+		return fmt.Errorf("failed to read pulled settings: %w", err)
+	}
+
+	var pulledConfig config.AnvilConfig
+	if err := yaml.Unmarshal(data, &pulledConfig); err != nil {
+		return fmt.Errorf("failed to parse pulled settings: %w", err)
+	}
+
+	// Regenerate git config from system if masked
+	regenerated, err := config.RegenerateGitConfigIfMasked(&pulledConfig)
+	if err != nil {
+		return fmt.Errorf("failed to regenerate git config: %w", err)
+	}
+
+	if regenerated {
+		// Save the updated config back to the temp location
+		updatedData, err := yaml.Marshal(&pulledConfig)
+		if err != nil {
+			return fmt.Errorf("failed to marshal updated config: %w", err)
+		}
+
+		if err := os.WriteFile(settingsPath, updatedData, constants.FilePerm); err != nil {
+			return fmt.Errorf("failed to write updated config: %w", err)
+		}
+
+		output.PrintSuccess("Git config regenerated from system")
+	} else {
+		output.PrintInfo("Git config already populated, no regeneration needed")
+	}
+
 	return nil
 }

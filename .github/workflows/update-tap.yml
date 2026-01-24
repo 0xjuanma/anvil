@@ -1,0 +1,20 @@
+name: Update Homebrew Tap
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  update-tap:
+    name: Update Homebrew Formula
+    uses: 0xjuanma/simple-release/.github/workflows/reusable-update-tap.yml@main
+    with:
+      tap-repo: '0xjuanma/homebrew-tap'
+      project-name: 'anvil'
+      formula-path: 'anvil.rb'
+      github-repo: '0xjuanma/anvil'
+    secrets:
+      token: ${{ secrets.TAP_TOKEN }}

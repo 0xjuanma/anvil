@@ -136,10 +136,22 @@ func pushAnvilConfig() error {
 	output.PrintInfo("Branch: %s", anvilConfig.GitHub.Branch)
 	output.PrintInfo("Settings file: %s", settingsPath)
 
-	// Common push workflow stages
+	// Stage 2: Sanitize settings to remove PII (git config section)
+	output.PrintStage("Sanitizing git config (masking username, email, SSH key path)...")
+	sanitizedPath, cleanup, err := config.CreateSanitizedTempFile(anvilConfig)
+	if err != nil {
+		output.PrintError("Failed to sanitize settings: %v", err)
+		return errors.NewConfigurationError(constants.OpPush, "sanitize-config", err)
+	}
+	// Ensure cleanup happens regardless of success or failure
+	defer cleanup()
+
+	output.PrintSuccess("Git config masked for security. Local values preserved.")
+
+	// Common push workflow stages (use sanitized path for diff preview)
 	ctx := context.Background()
 	anvilSettingsPath := fmt.Sprintf("%s/%s", constants.ANVIL_CONFIG_DIR, constants.ANVIL_CONFIG_FILE)
-	githubClient, diffSummary, err := executeCommonPushStagesForAnvil(anvilConfig, settingsPath, anvilSettingsPath[1:], ctx)
+	githubClient, diffSummary, err := executeCommonPushStagesForAnvil(anvilConfig, sanitizedPath, anvilSettingsPath[1:], ctx)
 	if err != nil {
 		return err
 	}
@@ -147,9 +159,9 @@ func pushAnvilConfig() error {
 		return nil // User cancelled
 	}
 
-	// Stage 4: Push configuration
+	// Stage 4: Push configuration (use sanitized path)
 	output.PrintStage("Pushing configuration to repository...")
-	result, err := githubClient.PushAnvilConfig(ctx, settingsPath)
+	result, err := githubClient.PushAnvilConfig(ctx, sanitizedPath)
 	if err != nil {
 		output.PrintError("Push failed: %v", err)
 		return cleanupOnError(ctx, githubClient, errors.NewInstallationError(constants.OpPush, "push-config", err))

@@ -103,7 +103,49 @@ func syncAnvilSettings(dryRun bool) error {
 		SpinnerSuccess: fmt.Sprintf("[Anvil] %s", constants.StatusSettingsSynced),
 		SuccessMsg:     "Sync done!",
 	}
-	return performSync(opts)
+
+	if err := performSync(opts); err != nil {
+		return err
+	}
+
+	// Regenerate git config from system after sync
+	if err := regenerateGitConfigAfterSync(); err != nil {
+		o.PrintWarning("Could not regenerate git config: %v", err)
+		// Don't fail the operation, just warn
+	}
+
+	return nil
+}
+
+// regenerateGitConfigAfterSync regenerates the git config section in the synced settings.
+// This ensures the git config is populated with the local system's configuration.
+func regenerateGitConfigAfterSync() error {
+	output := palantir.GetGlobalOutputHandler()
+	output.PrintStage("Refreshing git config from local git configuration...")
+
+	// Load the synced config
+	syncedConfig, err := config.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("failed to load synced config: %w", err)
+	}
+
+	// Regenerate git config from system if masked
+	regenerated, err := config.RegenerateGitConfigIfMasked(syncedConfig)
+	if err != nil {
+		return fmt.Errorf("failed to regenerate git config: %w", err)
+	}
+
+	if regenerated {
+		// Save the updated config
+		if err := config.SaveConfig(syncedConfig); err != nil {
+			return fmt.Errorf("failed to save updated config: %w", err)
+		}
+		output.PrintSuccess("Git config refreshed from local git configuration")
+	} else {
+		output.PrintInfo("Git config already populated, no refresh needed")
+	}
+
+	return nil
 }
 
 // syncAppConfig syncs configuration files for a specific app.

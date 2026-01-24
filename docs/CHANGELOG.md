@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Homebrew Installation** - Anvil can now be installed via Homebrew using `brew install 0xjuanma/tap/anvil`
+- **Git Config PII Protection** - Settings push now automatically masks git config section (username, email, ssh_key_path) before pushing to remote repository. Masked values are automatically regenerated from local system during pull and sync operations
 
 ### Changed
 - **Smart Update Detection** - The `anvil update` command now automatically detects whether Anvil was installed via Homebrew or script, and uses the appropriate update method (`brew upgrade` vs install script)

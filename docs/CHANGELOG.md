@@ -8,8 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Homebrew Installation** - Anvil can now be installed via Homebrew using `brew install 0xjuanma/tap/anvil`
 
 ### Changed
+- **Smart Update Detection** - The `anvil update` command now automatically detects whether Anvil was installed via Homebrew or script, and uses the appropriate update method (`brew upgrade` vs install script)
 
 ### Fixed
 
